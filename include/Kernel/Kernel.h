@@ -1,6 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
+#include "Core/CoreDefs.h"
+
 namespace ROS
 {
 

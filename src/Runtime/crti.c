@@ -1,21 +1,5 @@
 #include "Runtime/crti.h"
 
-void _init(void)
-{
-	for ( func_ptr* func = _init_array_start; func != _init_array_end; func++ )
-		(*func)();
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void _fini(void)
-{
-	for ( func_ptr* func = _fini_array_start; func != _fini_array_end; func++ )
-		(*func)();
-}
-
-// --------------------------------------------------------------------------------------------------------- 
-
 void __cxa_pure_virtual()
 {
     // Do nothing or print an error message.
@@ -36,7 +20,25 @@ void __cxa_guard_release (__guard *g)
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------
 
-func_ptr _init_array_start[0] __attribute__ ((used, section(".init_array"), aligned(sizeof(func_ptr)))) = { };
-func_ptr _fini_array_start[0] __attribute__ ((used, section(".fini_array"), aligned(sizeof(func_ptr)))) = { };
+// Prologue of the _init symbol
+__asm__ (
+	".section .init;"
+	".global _init;"
+	".type _init, @function;"
+	"_init:;"
+	"push %ebp;"
+	"movl %esp, %ebp;"
+);
+
+// --------------------------------------------------------------------------------------------------------- 
+
+// Prologue of the _fini symbol
+__asm__ (
+	".section .fini;"
+	".global _fini;"
+	".type _fini, @function;"
+	"_fini:;"
+	"push %ebp;"
+	"movl %esp, %ebp;"
+);
