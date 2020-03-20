@@ -1,4 +1,4 @@
-#include "Runtime/crti.h"
+#include "crti.h"
 
 // Epilogue of the _init symbol
 __asm__ (

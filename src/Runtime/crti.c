@@ -1,4 +1,4 @@
-#include "Runtime/crti.h"
+#include "crti.h"
 
 void __cxa_pure_virtual()
 {
