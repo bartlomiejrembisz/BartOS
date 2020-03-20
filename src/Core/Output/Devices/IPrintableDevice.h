@@ -1,9 +1,9 @@
 #ifndef IPRINTABLE_DEVICE_H
 #define IPRINTABLE_DEVICE_H
 
-#include "Core/ROseless.h"
+#include "Core/BartOS.h"
 
-namespace ROS
+namespace BartOS
 {
 
 /*
@@ -29,6 +29,6 @@ public:
     virtual StatusCode Write(const char *pStr) = 0;
 };
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif // IPRINTABLE_DEVICE_H

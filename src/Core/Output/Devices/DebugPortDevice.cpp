@@ -1,6 +1,6 @@
 #include "DebugPortDevice.h"
 
-namespace ROS
+namespace BartOS
 {
 
 StatusCode DebugPortDevice::Write(const uint8_t * const pBuffer, size_t bufferLength)
@@ -29,4 +29,4 @@ void DebugPortDevice::PrintChar(const char character)
     outb(IO_PORT_ADDR, character);
 }
 
-} // namespace ROS
+} // namespace BartOS

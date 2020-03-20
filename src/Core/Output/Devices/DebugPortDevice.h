@@ -3,7 +3,7 @@
 
 #include "IPrintableDevice.h"
 
-namespace ROS
+namespace BartOS
 {
 
 /*
@@ -25,6 +25,6 @@ private:
     void PrintChar(const char character);
 };
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif // DEBUG_PORT_DEVICE_H

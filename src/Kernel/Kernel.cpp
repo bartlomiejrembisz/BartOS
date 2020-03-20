@@ -4,7 +4,7 @@
 
 #include "BitFields.h"
 
-namespace ROS
+namespace BartOS
 {
 
 Kernel::Kernel(const multiboot_info_t * const pMultibootInfo) :
@@ -28,7 +28,7 @@ void Kernel::Run()
     }
 }
 
-} // namespace ROS
+} // namespace BartOS
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ extern "C" void kernel_main(const multiboot_info_t * const pMultibootInfo, unsig
         return;
     }
 
-    using namespace ROS;
+    using namespace BartOS;
 
     Kernel kernel(pMultibootInfo);
     kernel.Run();

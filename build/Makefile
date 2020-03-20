@@ -36,7 +36,7 @@ OBJECTS				+= $(patsubst $(KERNEL_SRC)/%.S, $(OBJ_DIR)/%.o, $(ASMOBJECTS))
 
 RUNTIME_OBJECTS		:= $(patsubst $(RUNTIME_SRC)/%.c, $(OBJ_DIR)/%.o, $(RUNTIMEOBJECTS))
 
-KERNEL_NAME			:= ROSeless.bin
+KERNEL_NAME			:= BartOS.bin
 KERNEL_DIR			:= $(BIN)/$(KERNEL_NAME)
 
 build: $(OBJECTS) $(RUNTIME_OBJECTS)

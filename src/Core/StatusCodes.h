@@ -10,13 +10,13 @@
 #define DEFINE_STATUS_CODE(statusNum, statusCode, statusCodeStr) const StatusCode JOIN(STATUS_CODE_, statusCode) = statusNum;
 
 
-namespace ROS
+namespace BartOS
 {
 
 using StatusCode = uint8_t;
 
 STATUS_CODE_LIST(DEFINE_STATUS_CODE)
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif // STATUS_CODES_H

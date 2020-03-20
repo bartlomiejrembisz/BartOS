@@ -6,7 +6,7 @@
 #include <limits.h>
 #include "Core/stdlib.h"
 
-namespace ROS
+namespace BartOS
 {
 
 // Macros
@@ -182,6 +182,6 @@ public:
     static constexpr size_t value = 1;
 };
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif //! CORE_DEFS_H

@@ -1,10 +1,10 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "Core/ROseless.h"
+#include "Core/BartOS.h"
 #include "multiboot.h"
 
-namespace ROS
+namespace BartOS
 {
 
 /*
@@ -33,6 +33,6 @@ private:
     bool                            m_isShuttingDown;       ///< Is the kernel shutting down.
 };
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif // KERNEL_H

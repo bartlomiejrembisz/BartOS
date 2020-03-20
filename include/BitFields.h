@@ -6,7 +6,7 @@
 #include "frg/macros.hpp"
 #include "cxxshim/type_traits"
 
-namespace ROS
+namespace BartOS
 {
 
 /*
@@ -152,6 +152,6 @@ public:
     }
 };
 
-} // namespace ROS
+} // namespace BartOS
 
 #endif // BITFIELDS_H
