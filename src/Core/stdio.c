@@ -1,5 +1,6 @@
 #include <Core/stdio.h>
 #include <Core/stdlib.h>
+#include "Misc/io.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,15 +14,15 @@ char getc(void)
 
 void putc(char c)
 {
+    outb(0xe9, c);
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void puts(const char *pStr)
 {
-    int i;
-    for (i = 0; pStr[i] != '\0'; i ++)
-        putc(pStr[i]);
+    while (*pStr)
+        putc(*pStr++);
 }
 
 // ---------------------------------------------------------------------------------------------------------

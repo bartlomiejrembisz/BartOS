@@ -2,13 +2,13 @@
 #include "Core/stdio.h"
 #include "Core/stdlib.h"
 
-#include <stddef.h>
-#include <stdint.h>
+#include "BitFields.h"
 
 namespace ROS
 {
 
-Kernel::Kernel() :
+Kernel::Kernel(const multiboot_info_t * const pMultibootInfo) :
+    m_pMultibootInfo(pMultibootInfo),
     m_isShuttingDown(false)
 {
 }
@@ -33,9 +33,16 @@ void Kernel::Run()
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
 
-extern "C" void kernel_main()
+extern "C" void kernel_main(const multiboot_info_t * const pMultibootInfo, unsigned int magic)
 {
+    if (MULTIBOOT_BOOTLOADER_MAGIC != magic)
+    {
+        // Print error to the screen and return.
+        return;
+    }
 
-    ROS::Kernel kernel;
+    using namespace ROS;
+
+    Kernel kernel(pMultibootInfo);
     kernel.Run();
 }

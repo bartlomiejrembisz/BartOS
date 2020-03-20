@@ -1,7 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include "Core/CoreDefs.h"
+#include "Core/ROseless.h"
+#include "multiboot.h"
 
 namespace ROS
 {
@@ -15,7 +16,7 @@ public:
     /*
      *  @brief The Constructor.
      */
-    Kernel();
+        Kernel(const multiboot_info_t * const pMultibootInfo);
 
     /*
      *  @brief The Destructor.
@@ -28,8 +29,8 @@ public:
     void Run();
 
 private:
-    bool        m_isShuttingDown;       ///< Is the kernel shutting down.
-
+    const multiboot_info_t * const  m_pMultibootInfo;       ///< Multiboot info object.
+    bool                            m_isShuttingDown;       ///< Is the kernel shutting down.
 };
 
 } // namespace ROS
