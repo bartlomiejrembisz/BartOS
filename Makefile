@@ -29,6 +29,7 @@ CRTI_OBJ			:= $(RUNTIME_SRC)/crti.o
 CRTBEGIN_OBJ		:= $(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ			:= $(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTN_OBJ			:= $(RUNTIME_SRC)/crtn.o
+ICXXABI_OBJ			:= $(RUNTIME_SRC)/icxxabi.o
 
 OBJECTS				:= ${C_SOURCES:.c=.o} ${ASM_SOURCES:.S=.o} ${CPP_SOURCES:.cpp=.o}
 
@@ -40,7 +41,7 @@ KERNEL_DIR			:= $(BIN)/$(KERNEL_NAME)
 QEMU_FLAGS			:= -m 1G -debugcon stdio
 
 build: $(OBJECTS) $(OBJECTS_RUNTIME)
-	$(CC) $(LINKER_FLAGS) -T $(LINKER_SCRIPT) -o $(KERNEL_DIR) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECTS) $(CRTEND_OBJ) $(CRTN_OBJ)
+	$(CC) $(LINKER_FLAGS) -T $(LINKER_SCRIPT) -o $(KERNEL_DIR) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECTS) $(ICXXABI_OBJ) $(CRTEND_OBJ) $(CRTN_OBJ)
 	mkdir -p $(OBJ_DIR)
 	mv $(OBJECTS) $(OBJECTS_RUNTIME) $(OBJ_DIR)
 
