@@ -2,8 +2,6 @@
 #define BARTOS_H
 
 #include "StatusCodes.h"
-#include "Misc/io.h"
-#include "Core/stdio.h"
-#include "Core/stdlib.h"
+#include "libc/io.h"
 
 #endif //! BARTOS_H
