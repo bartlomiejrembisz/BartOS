@@ -93,12 +93,12 @@ public:
      */
     static constexpr uint64_t GetLength()
     {
-        return N;
+        return m_length;
     }
 
-private:
+protected:
     typedef Bitmap<N> BitmapType;                   //< Forward bitmap type to bitfields to access total length.
-    typedef Bitmap<N> Base;                         //< To check if the type is a bitmap.
+    typedef Bitmap<N> _Base;                         //< To check if the type is a bitmap.
 
     static constexpr uint64_t m_offset = 0;         //< Offset of the bit field.
     static constexpr uint64_t m_length = N;         //< Length of the bit field.
@@ -132,10 +132,10 @@ class BitField
 {
 private:
     typedef typename BIT_MAP::BitmapType BitmapType;    //< Foward BitmapType to next BitField.
-    typedef BitField<BIT_MAP, LENGTH> Base;             //< To check if the type is a bitmap.
+    typedef BitField<BIT_MAP, LENGTH> _Base;             //< To check if the type is a bitmap.
 
     static constexpr uint64_t m_length  = LENGTH;                                                                               //< Length of the bit field.
-    static constexpr uint64_t m_offset  = (IsBitmap<typename BIT_MAP::Base>) ? 0 : (BIT_MAP::m_offset + BIT_MAP::m_length);     //< Offset of the bit field.
+    static constexpr uint64_t m_offset  = (IsBitmap<typename BIT_MAP::_Base>) ? 0 : (BIT_MAP::m_offset + BIT_MAP::m_length);     //< Offset of the bit field.
     static constexpr uint64_t m_maximum = BitTraits<LENGTH>::maxValue;                                                          //< The bit field maximum value.
     static constexpr uint64_t m_mask    = (m_maximum << m_offset);                                                              //< The bit field mask.
 
