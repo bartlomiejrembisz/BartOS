@@ -1,6 +1,6 @@
-#include <Core/stdio.h>
-#include <Core/stdlib.h>
-#include "Misc/io.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "io.h"
 
 #ifdef __cplusplus
 extern "C" {
