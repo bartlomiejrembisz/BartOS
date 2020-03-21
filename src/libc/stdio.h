@@ -1,36 +1,18 @@
 #ifndef STD_IO_H
 #define STD_IO_H
 
+#include "Kprintf.h"
+
+typedef __builtin_va_list va_list;
+typedef __builtin_va_list __isoc_va_list;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/*
- *  @brief Get char from I/O
- */
-char getc(void);
+int putchar(int);
 
-/*
- *  @brief Put char to I/O
- * 
- *  @param  c the character.
- */
-void putc(char c);
-
-/*
- *  @brief Put string to I/O
- * 
- *  @param  pStr buffer containing the string.
- */
-void puts(const char *pStr);
-
-/*
- *  @brief Get string from I/O
- * 
- *  @param  pBuffer buffer to copy the string into.
- *  @param  bufferLength the length of the buffer.
- */
-void gets(char *pBuffer, int bufferLength);
+int puts(const char *);
 
 #ifdef __cplusplus
 }
