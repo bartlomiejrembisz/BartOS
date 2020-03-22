@@ -151,12 +151,12 @@ constexpr auto IsBitmap { decltype(IsBitmapHelper(std::declval<T>()))::value };
 template <typename BIT_MAP, uint64_t LENGTH>
 class BitField
 {
-protected:
+private:
     typedef typename BIT_MAP::BitmapType BitmapType;    //< Foward BitmapType to next BitField.
-    typedef BitField<BIT_MAP, LENGTH> _Base;             //< To check if the type is a bitmap.
+    typedef BitField<BIT_MAP, LENGTH> _Base;            //< To check if the type is a bitmap.
 
     static constexpr uint64_t m_length  = LENGTH;                                                                               //< Length of the bit field.
-    static constexpr uint64_t m_offset  = (IsBitmap<typename BIT_MAP::_Base>) ? 0 : (BIT_MAP::m_offset + BIT_MAP::m_length);     //< Offset of the bit field.
+    static constexpr uint64_t m_offset  = (IsBitmap<typename BIT_MAP::_Base>) ? 0 : (BIT_MAP::m_offset + BIT_MAP::m_length);    //< Offset of the bit field.
     static constexpr uint64_t m_maximum = BitTraits<LENGTH>::maxValue;                                                          //< The bit field maximum value.
     static constexpr uint64_t m_mask    = (m_maximum << m_offset);                                                              //< The bit field mask.
 
@@ -210,61 +210,76 @@ public:
  *  @brief The divided bit field class.
  *  Used when the bitfield bits in a bitmap are not contiguous.
  */
-template <typename BIT_MAP, uint64_t LENGTH, typename PARENT>
-class DividedBitField : public BitField<BIT_MAP, LENGTH>
-{
-private:
-    typedef BitField<BIT_MAP, LENGTH> BaseBitField;
-
-public:
-    typedef typename BitsToIntegralType<LENGTH + PARENT::GetLength(), false>::Type ValueType;   //< Typedef for the value type (with parent).
-    typedef typename BitsToIntegralType<LENGTH, false>::Type ActualValueType;                   //< Typedef for the actual value type (no parent).
-
-    /*
-     *  @brief Set bitfield in the underlying value.
-     * 
-     *  @param underlyingValue the underlying value.
-     *  @param value new value to set.
-     */
-    static void Set(typename BaseBitField::Type &underlyingValue, const ValueType value)
-    {
-        const ValueType newValue = (value >> PARENT::GetLength());
-        underlyingValue &= ~BaseBitField::m_mask;
-        underlyingValue |= (static_cast<typename BaseBitField::Type>(newValue) << BaseBitField::m_offset);
-    }
-
-    /*
-     *  @brief Get full bitfield from the underlying value.
-     * 
-     *  @param underlyingValue the underlying value.
-     */
-    static const ValueType Get(const typename BaseBitField::Type &underlyingValue)
-    {
-        ValueType result = PARENT::Get(underlyingValue);
-        result |= (underlyingValue >> BaseBitField::m_offset);
-        return result;
-    }
-
-    /*
-     *  @brief Get actual bitfield value from the underlying value.
-     * 
-     *  @param underlyingValue the underlying value.
-     */
-    static const ActualValueType GetActualValue(const typename BaseBitField::Type &underlyingValue)
-    {
-        return ((underlyingValue >> BaseBitField::m_offset) & BaseBitField::m_maximum);
-    }
-
-    /*
-     *  @brief Get the length of the bitfield.
-     * 
-     *  @return return length of bitfield.
-     */
-    static constexpr uint64_t GetLength()
-    {
-        return BaseBitField::GetLength() + PARENT::GetLength();
-    }
-};
+//template <typename BIT_MAP, uint64_t LENGTH, typename PARENT>
+//class DividedBitField
+//{
+//private:
+//    typedef typename BIT_MAP::BitmapType BitmapType;    //< Foward BitmapType to next BitField.
+//    typedef BitField<BIT_MAP, LENGTH> _Base;            //< To check if the type is a bitmap.
+//
+//    static constexpr uint64_t m_length  = LENGTH;                                                                               //< Length of the bit field.
+//    static constexpr uint64_t m_offset  = (IsBitmap<typename BIT_MAP::_Base>) ? 0 : (BIT_MAP::m_offset + BIT_MAP::m_length);    //< Offset of the bit field.
+//    static constexpr uint64_t m_maximum = BitTraits<LENGTH>::maxValue;                                                          //< The bit field maximum value.
+//    static constexpr uint64_t m_mask    = (m_maximum << m_offset);                                                              //< The bit field mask.
+//
+//    static_assert(BitmapType::m_length >= (m_offset + m_length));           //< Assert if size of bitfields exceeds size of bitmap.
+//
+//    template <typename, uint64_t>
+//    friend class BitField;
+//
+//    template <uint64_t>
+//    friend class Bitmap;
+//
+//public:
+//    typedef typename BitsToIntegralType<LENGTH + PARENT::GetLength(), false>::Type ValueType;   //< Typedef for the value type (with parent).
+//    typedef typename BitsToIntegralType<LENGTH, false>::Type ActualValueType;                   //< Typedef for the actual value type (no parent).
+//    typedef typename BitmapType::Type Type;                                                     //< Forward the underlying type.
+//
+//    /*
+//     *  @brief Set bitfield in the underlying value.
+//     * 
+//     *  @param underlyingValue the underlying value.
+//     *  @param value new value to set.
+//     */
+//    static void Set(typename Type &underlyingValue, const ValueType value)
+//    {
+//        const ValueType newValue = (value >> PARENT::GetLength());
+//        underlyingValue &= ~m_mask;
+//        underlyingValue |= (static_cast<typename Type>(newValue) << m_offset);
+//    }
+//
+//    /*
+//     *  @brief Get full bitfield from the underlying value.
+//     * 
+//     *  @param underlyingValue the underlying value.
+//     */
+//    static const ValueType Get(const typename Type &underlyingValue)
+//    {
+//        ValueType result = PARENT::Get(underlyingValue);
+//        result |= (underlyingValue >> m_offset);
+//        return result;
+//    }
+//
+//    /*
+//     *  @brief Get actual bitfield value from the underlying value.
+//     * 
+//     *  @param underlyingValue the underlying value.
+//     */
+//    static const ActualValueType GetActualValue(const typename Type &underlyingValue)
+//    {
+//        return ((underlyingValue >> m_offset) & m_maximum);
+//    }
+//
+//    /*
+//     *  @brief Get the length of the bitfield.
+//     * 
+//     *  @return return length of bitfield.
+//     */
+//    static constexpr uint64_t GetLength()
+//    {
+//        return BaseBitField::GetLength() + PARENT::GetLength();
+//    }
+//};
 
 } // namespace BartOS
 
