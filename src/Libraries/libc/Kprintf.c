@@ -1,9 +1,9 @@
 #include "Kprintf.h"
 #include "stdarg.h"
-#include "libc/ctype.h"
+#include "ctype.h"
 
-#include "libc/stdio.h"
-#include "libc/string.h"
+#include "stdio.h"
+#include "string.h"
 
 static int skip_atoi(const char **s)
 {

@@ -1,10 +1,9 @@
 #ifndef CORE_DEFS_H
 #define CORE_DEFS_H
 
-#include <stdint.h>
+#include "stdint.h"
 #include <stddef.h>
 #include <limits.h>
-#include "Core/stdlib.h"
 
 namespace BartOS
 {

@@ -1,48 +1,18 @@
-#include "Kernel/Kernel.h"
-#include "Core/stdio.h"
-#include "Core/stdlib.h"
+#include "BartOS.h"
 
-#include "BitFields.h"
-
-namespace BartOS
-{
-
-Kernel::Kernel(const multiboot_info_t * const pMultibootInfo) :
-    m_pMultibootInfo(pMultibootInfo),
-    m_isShuttingDown(false)
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-Kernel::~Kernel()
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void Kernel::Run()
-{
-    while (!m_isShuttingDown)
-    {
-    }
-}
-
-} // namespace BartOS
-
-// ---------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------
+#include "Arch/i386/CPU.h"
 
 extern "C" void kernel_main(const multiboot_info_t * const pMultibootInfo, unsigned int magic)
 {
+    using namespace BartOS;
     if (MULTIBOOT_BOOTLOADER_MAGIC != magic)
     {
         // Print error to the screen and return.
-        return;
+        x86::CPU::Abort();
     }
 
-    using namespace BartOS;
+    // Store the multiboot header in a remote place.
+    x86::CPU::m_pMultibootInfo = pMultibootInfo;
 
-    Kernel kernel(pMultibootInfo);
-    kernel.Run();
+    x86::CPU::GetInstance().InitializeGdt();
 }

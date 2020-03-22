@@ -1,7 +1,7 @@
 #ifndef KPRINT_H
 #define KPRINT_H
 
-#include "libc/inttypes.h"
+#include "inttypes.h"
 
 #ifdef __cplusplus
 extern "C"

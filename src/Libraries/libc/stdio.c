@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include "io.h"
+#include "Kernel/Arch/i386/io.h"
 
 int putchar(int c)
 {
