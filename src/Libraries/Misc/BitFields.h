@@ -51,6 +51,27 @@ public:
     }
 
     /*
+     *  @brief Copy constructor.
+     * 
+     *  @param rhs the Bitmap to copy from.
+     */
+    Bitmap(const Bitmap<N> &rhs) : m_value(rhs.m_value)
+    {
+    }
+
+    /*
+     *  @brief Copy assignment operator
+     * 
+     *  @param rhs the value to copy from.
+     */
+    Bitmap<N>& operator=(const Bitmap<N> &rhs)
+    {
+        m_value = rhs.m_value;
+
+        return *this;
+    }
+
+    /*
      *  @brief Set the underlying value.
      */
     void Set(const Type value)
