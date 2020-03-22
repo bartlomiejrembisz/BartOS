@@ -85,6 +85,8 @@ GlobalDescriptorTable::SelectorOffset GlobalDescriptorTable::GetSelectorOffset(c
 auto GlobalDescriptorTable::Entry::Create(const Base::ValueType base, const uint32_t limit, const AccessByte::ValueType accessByte,
             const Flags::ValueType flags) -> Entry
 {
+    // Disgusting split bitfields not yet supported by BitFields.h
+
     Entry gdtEntry;
 
     gdtEntry.Set<Limit>(limit & 0xFFFF);
