@@ -25,7 +25,7 @@ template <typename CLASS>
 class Singleton
 {
 public:
-    static CLASS &GetInstance();
+    static CLASS &Get();
 
 protected:
     Singleton();
@@ -50,7 +50,7 @@ Singleton<CLASS>::Singleton()
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename CLASS>
-CLASS &Singleton<CLASS>::GetInstance()
+CLASS &Singleton<CLASS>::Get()
 {
     return m_singleton;
 }
