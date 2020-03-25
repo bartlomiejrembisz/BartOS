@@ -1,18 +1,18 @@
 #include "BartOS.h"
 
 #include "Arch/i386/CPU.h"
+#include "Memory/PhysicalMemoryManager.h"
 
-extern "C" void kernel_main(const multiboot_info_t * const pMultibootInfo, unsigned int magic)
+extern "C" void kernel_main()
 {
     using namespace BartOS;
-    if (MULTIBOOT_BOOTLOADER_MAGIC != magic)
+
+    x86::CPU::Get().InitializeSse();
+    x86::CPU::Get().InitializeGdt();
+
+    if (!PhysicalMemoryManager::Get().Initialize())
     {
-        // Print error to the screen and return.
-        x86::CPU::Abort();
+        kprintf("Memory map not found in multiboot_into.");
+        return;
     }
-
-    // Store the multiboot header in a remote place.
-    x86::CPU::m_pMultibootInfo = pMultibootInfo;
-
-    x86::CPU::GetInstance().InitializeGdt();
 }
