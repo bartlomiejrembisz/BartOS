@@ -39,6 +39,7 @@ static const AccessFlag ACCESSED_BIT    = 0b00000001;   // Whether the segment i
 using FlagBit = uint8_t;
 static const FlagBit GRANULARITY = 0b1000;
 static const FlagBit SIZE        = 0b0100;
+static const FlagBit L           = 0b0010;
 
 } // namespace
 

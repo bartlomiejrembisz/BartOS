@@ -1,7 +1,7 @@
 #include "BartOS.h"
 
-#include "Arch/i386/CPU.h"
-#include "Memory/PhysicalMemoryManager.h"
+#include "Kernel/Arch/x86_64/CPU.h"
+#include "Kernel/Memory/PhysicalMemoryManager.h"
 
 extern "C" void kernel_main()
 {

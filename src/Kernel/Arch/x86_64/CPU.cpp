@@ -3,7 +3,7 @@
 
 #include "Libraries/libc/stdio.h"
 
-#include "load_gdt.h"
+#include "x86_64.h"
 
 namespace BartOS
 {
@@ -35,7 +35,7 @@ void CPU::InitializeGdt()
 
     m_globalDescriptorTable.Initialize();
 
-    //load_gdt(&m_globalDescriptorTable, kernelCodeOffset, kernelDataOffset);
+    load_gdt(&m_globalDescriptorTable, kernelCodeOffset, kernelDataOffset);
 
     kprintf("GDT initialized\n");
 }

@@ -2,7 +2,7 @@
 #define BARTOS_H
 
 #include "Libraries/Core/StatusCodes.h"
-#include "Kernel/Arch/i386/io.h"
+#include "Kernel/Arch/x86_64/io.h"
 #include "Libraries/libc/Kprintf.h"
 
 // Forward declare multiboot_info_t.

@@ -48,12 +48,14 @@ public:
     static SelectorOffset GetSelectorOffset(const Selector selector);
 
 private:
+    //! GDT Descriptor.
     struct [[gnu::packed]] Descriptor
     {
         uint16_t    m_size;
         uint64_t    m_address;  // Address of the
     };
 
+    //! GDT Entry.
     class Entry : public Bitmap<64>
     {
     public:
