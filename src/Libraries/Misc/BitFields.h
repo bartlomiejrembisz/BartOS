@@ -85,8 +85,6 @@ public:
     template<typename BIT_FIELD>
     void Set(const typename BIT_FIELD::ValueType value)
     {
-        FRG_ASSERT(value <= BIT_FIELD::m_maximum);
-
         BIT_FIELD::Set(m_value, value);
     }
 
