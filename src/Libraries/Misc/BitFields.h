@@ -37,7 +37,7 @@ public:
     typedef typename BitTraits<N>::IntegralType Type;   //< The underlying type.
 
     //! Constructor
-    Bitmap() : m_value(0)
+    constexpr Bitmap() : m_value(0)
     {
     }
 
@@ -46,7 +46,7 @@ public:
      * 
      *  @param value the default init value.
      */
-    Bitmap(const Type value) : m_value(value)
+    constexpr Bitmap(const Type value) : m_value(value)
     {
     }
 
@@ -55,7 +55,7 @@ public:
      * 
      *  @param rhs the Bitmap to copy from.
      */
-    Bitmap(const Bitmap<N> &rhs) : m_value(rhs.m_value)
+    constexpr Bitmap(const Bitmap<N> &rhs) : m_value(rhs.m_value)
     {
     }
 
@@ -64,7 +64,7 @@ public:
      * 
      *  @param rhs the value to copy from.
      */
-    Bitmap<N>& operator=(const Bitmap<N> &rhs)
+    constexpr Bitmap<N>& operator=(const Bitmap<N> &rhs)
     {
         m_value = rhs.m_value;
 
@@ -74,7 +74,7 @@ public:
     /*
      *  @brief Set the underlying value.
      */
-    void Set(const Type value)
+    constexpr void Set(const Type value)
     {
         m_value = value;
     }
@@ -83,7 +83,7 @@ public:
      *  @brief Set the bit field.
      */
     template<typename BIT_FIELD>
-    void Set(const typename BIT_FIELD::ValueType value)
+    constexpr void Set(const typename BIT_FIELD::ValueType value)
     {
         BIT_FIELD::Set(m_value, value);
     }
@@ -91,7 +91,7 @@ public:
     /*
      *  @brief Get the underlying value.
      */
-    Type Get()
+    constexpr Type Get()
     {
         return m_value;
     }
@@ -100,7 +100,7 @@ public:
      *  @brief Get the bit field.
      */
     template<typename BIT_FIELD>
-    const typename BIT_FIELD::ValueType Get()
+    constexpr typename BIT_FIELD::ValueType Get()
     {
         return BIT_FIELD::Get(m_value);
     }
@@ -175,7 +175,7 @@ public:
      *  @param underlyingValue the underlying value.
      *  @param value new value to set.
      */
-    static void Set(Type &underlyingValue, const ValueType value)
+    static constexpr void Set(Type &underlyingValue, const ValueType value)
     {
         underlyingValue &= ~m_mask;
         underlyingValue |= (static_cast<Type>(value) << m_offset);
@@ -186,7 +186,7 @@ public:
      * 
      *  @param underlyingValue the underlying value.
      */
-    static const ValueType Get(const Type &underlyingValue)
+    static constexpr ValueType Get(const Type &underlyingValue)
     {
         return ((underlyingValue >> m_offset) & m_maximum);
     }
