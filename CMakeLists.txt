@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(BartOS)
 
 # Setup C
-set(CMAKE_C_COMPILER /home/bartek/opt/cross/bin/i686-elf-gcc)
+set(CMAKE_C_COMPILER /home/bartek/opt/cross/bin/x86_64-elf-gcc)
 
 # Setup using asm
 enable_language(ASM)

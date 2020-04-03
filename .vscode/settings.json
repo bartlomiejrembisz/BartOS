@@ -14,7 +14,9 @@
         "functional": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "random": "cpp",
+        "cctype": "cpp"
     },
     "terminal.integrated.shell.windows": "cmd.exe",
     "C_Cpp.dimInactiveRegions": true

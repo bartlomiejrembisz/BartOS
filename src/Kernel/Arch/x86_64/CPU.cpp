@@ -3,57 +3,11 @@
 
 #include "Libraries/libc/stdio.h"
 
-#include "x86_64.h"
-
 namespace BartOS
 {
 
-namespace x86
+namespace x86_64
 {
-
-const multiboot_info_t * CPU::m_pMultibootInfo = nullptr;
-
-// ---------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------
-
-CPU::CPU()
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-CPU::~CPU()
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void CPU::InitializeGdt()
-{
-    const uint32_t kernelCodeOffset = GDT::GetSelectorOffset(GDT::KERNEL_CODE);
-    const uint32_t kernelDataOffset = GDT::GetSelectorOffset(GDT::KERNEL_DATA);
-
-    m_globalDescriptorTable.Initialize();
-
-    load_gdt(&m_globalDescriptorTable, kernelCodeOffset, kernelDataOffset);
-
-    kprintf("GDT initialized\n");
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void CPU::InitializeIdt()
-{
-    kprintf("IDT initialized\n");
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void CPU::InitializeSse()
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
 
 void CPU::Abort()
 {

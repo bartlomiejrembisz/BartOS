@@ -4,14 +4,15 @@
 #include "Kernel/BartOS.h"
 
 #include "Libraries/Misc/BitFields.h"
+#include "Libraries/Misc/Singleton.h"
 
 namespace BartOS
 {
 
-namespace x86
+namespace x86_64
 {
 
-class GlobalDescriptorTable
+class GlobalDescriptorTable : public Singleton<GlobalDescriptorTable>
 {
 public:
     using SelectorOffset = uint8_t;
@@ -29,14 +30,22 @@ public:
         GDT_ENTRY_COUNT
     };
 
-    //! Constructor.
-    GlobalDescriptorTable();
-
-    //! Destructor.
-    ~GlobalDescriptorTable();
-
     //! Initialize the Global Descriptor Table.
     void Initialize();
+
+    /*
+     *  @brief Set the code segment.
+     *
+     *  @param selector the GDT selector.
+     */
+    void SetCodeSegment(const Selector selector);
+
+    /*
+     *  @brief Set the data segment.
+     *
+     *  @param selector the GDT selector.
+     */
+    void SetDataSegment(const Selector selector);
 
     /*
      *  @brief Get the selector offset 
@@ -70,8 +79,16 @@ private:
             const Flags::ValueType flags);
     };
 
+    //! Constructor.
+    GlobalDescriptorTable();
+
+    //! Destructor.
+    ~GlobalDescriptorTable();
+
     Descriptor  m_descriptor;                       //< The GDT descriptor.
     Entry       m_entries[GDT_ENTRY_COUNT];         //< The list of GDT entries.
+
+    friend Singleton<GlobalDescriptorTable>;
 };
 
 using GDT = GlobalDescriptorTable;

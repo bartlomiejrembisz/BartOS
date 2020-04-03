@@ -1,10 +1,11 @@
 #include "GDT.h"
 
+#include "x86_64.h"
 
 namespace BartOS
 {
 
-namespace x86
+namespace x86_64
 {
 
 namespace
@@ -39,12 +40,15 @@ static const AccessFlag ACCESSED_BIT    = 0b00000001;   // Whether the segment i
 using FlagBit = uint8_t;
 static const FlagBit GRANULARITY = 0b1000;
 static const FlagBit SIZE        = 0b0100;
-static const FlagBit L           = 0b0010;
+static const FlagBit LONG        = 0b0010;
 
 } // namespace
 
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
 GlobalDescriptorTable::GlobalDescriptorTable() : 
-    m_descriptor { .m_size = sizeof(Entry) * GDT_ENTRY_COUNT, (uint64_t)&m_entries[0] }
+    m_descriptor { .m_size = (sizeof(Entry) * GDT_ENTRY_COUNT), (uint64_t)&m_entries[0] }
 {
 }
 
@@ -60,17 +64,38 @@ void GlobalDescriptorTable::Initialize()
 {
     m_entries[NULL_SEL] = Entry::Create(0, 0, 0, 0);
 
-    m_entries[KERNEL_CODE] = Entry::Create(0, 0xFFFFFFFF, PRESENT_BIT | KERNEL_PRIV |
-        CODE_DATA_TYPE | EXE_SEG_BIT | READWRITE_BIT, GRANULARITY | SIZE);
+    m_entries[KERNEL_CODE] = Entry::Create(0, 0, PRESENT_BIT | KERNEL_PRIV |
+        CODE_DATA_TYPE | EXE_SEG_BIT | READWRITE_BIT, GRANULARITY | LONG);
 
-    m_entries[KERNEL_DATA] = Entry::Create(0, 0xFFFFFFFF, PRESENT_BIT | KERNEL_PRIV |
-        CODE_DATA_TYPE | DATA_SEG_BIT | READWRITE_BIT, GRANULARITY | SIZE);
+    m_entries[KERNEL_DATA] = Entry::Create(0, 0, PRESENT_BIT | KERNEL_PRIV |
+        CODE_DATA_TYPE | DATA_SEG_BIT | READWRITE_BIT, GRANULARITY | LONG);
 
-    m_entries[USER_CODE] = Entry::Create(0, 0xFFFFFFFF, PRESENT_BIT | USER_PRIV |
-        CODE_DATA_TYPE | EXE_SEG_BIT | READWRITE_BIT, GRANULARITY | SIZE);
+    m_entries[USER_CODE] = Entry::Create(0, 0, PRESENT_BIT | USER_PRIV |
+        CODE_DATA_TYPE | EXE_SEG_BIT | READWRITE_BIT, GRANULARITY | LONG);
 
-    m_entries[USER_DATA] = Entry::Create(0, 0xFFFFFFFF, PRESENT_BIT | USER_PRIV |
-        CODE_DATA_TYPE | DATA_SEG_BIT | READWRITE_BIT, GRANULARITY | SIZE);
+    m_entries[USER_DATA] = Entry::Create(0, 0, PRESENT_BIT | USER_PRIV |
+        CODE_DATA_TYPE | DATA_SEG_BIT | READWRITE_BIT, GRANULARITY | LONG);
+
+    const uint32_t kernelCodeOffset = GDT::GetSelectorOffset(GDT::KERNEL_CODE);
+    const uint32_t kernelDataOffset = GDT::GetSelectorOffset(GDT::KERNEL_DATA);
+
+    load_gdt(&m_descriptor, kernelCodeOffset, kernelDataOffset);
+
+    kprintf("GDT initialized\n");
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void GlobalDescriptorTable::SetCodeSegment(const Selector selector)
+{
+    gdt_set_code_segment(GDT::GetSelectorOffset(selector));
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void GlobalDescriptorTable::SetDataSegment(const Selector selector)
+{
+    gdt_set_code_segment(GDT::GetSelectorOffset(selector));
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -87,13 +112,12 @@ auto GlobalDescriptorTable::Entry::Create(const Base::ValueType base, const uint
             const Flags::ValueType flags) -> Entry
 {
     // Disgusting split bitfields not yet supported by BitFields.h
-
     Entry gdtEntry;
 
-    gdtEntry.Set<Limit>(limit & 0xFFFF);
-    gdtEntry.Set<LimitRemainder>((limit >> 16) & 0xF);
-    gdtEntry.Set<Base>(base & 0xFFFFFF);
-    gdtEntry.Set<BaseRemainder>((base >> 24) & 0xFF);
+    gdtEntry.Set<Limit>(limit);
+    gdtEntry.Set<LimitRemainder>((limit >> Limit::GetLength()));
+    gdtEntry.Set<Base>(base);
+    gdtEntry.Set<BaseRemainder>((base >> Base::GetLength()));
     gdtEntry.Set<AccessByte>(accessByte);
     gdtEntry.Set<Flags>(flags);
 

@@ -159,7 +159,7 @@ class BitTraits
 public:
     typedef typename BitsToIntegralType<N, false>::Type IntegralType;
 
-    static constexpr size_t maxValue = (1 << N) - 1;    //< The max value.
+    static constexpr uint64_t maxValue = (1ULL << N) - 1;    //< The max value.
 };
 
 // ---------------------------------------------------------------------------------------------------------

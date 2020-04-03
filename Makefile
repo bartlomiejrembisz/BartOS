@@ -41,7 +41,7 @@ KERNEL_NAME			:= BartOS
 KERNEL_DIR			:= $(BIN)/$(KERNEL_NAME).bin
 KERNEL_ISO			:= $(BIN)/$(KERNEL_NAME).iso
 
-QEMU_FLAGS			:= -cdrom $(KERNEL_ISO) -m 4G -debugcon stdio
+QEMU_FLAGS			:= -cdrom $(KERNEL_ISO) -m 4G -d int -D debug.log -no-reboot -vga std
 
 iso: build
 	@mkdir -p isofiles/boot/grub
@@ -64,13 +64,13 @@ build: $(OBJECTS) $(OBJECTS_RUNTIME)
 	nasm $(ASSEMBLER_FLAGS) $< -o $@
 
 run: iso
-	qemu-system-x86_64 $(QEMU_FLAGS)
+	qemu-system-x86_64 $(QEMU_FLAGS) -monitor stdio
 
 puredebug: iso
-	qemu-system-x86_64 $(QEMU_FLAGS) -s -S &
+	qemu-system-x86_64 $(QEMU_FLAGS) -debugcon stdio -s -S &
 
 debug: iso
-	qemu-system-x86_64 $(QEMU_FLAGS) -s -S &
+	qemu-system-x86_64 $(QEMU_FLAGS) -debugcon stdio -s -S &
 	gdb -ex "target remote localhost:1234" -ex "symbol-file $(KERNEL_DIR)"
 
 cleanobjs:

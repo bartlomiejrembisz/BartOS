@@ -1,6 +1,6 @@
 ; Crappy long mode setup from https://os.phil-opp.com/entering-longmode/
 
-section bss
+section .bss
 align 4096
 p4_table:
     resb 4096

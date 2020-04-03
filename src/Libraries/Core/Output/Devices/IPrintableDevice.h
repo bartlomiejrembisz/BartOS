@@ -1,7 +1,7 @@
 #ifndef IPRINTABLE_DEVICE_H
 #define IPRINTABLE_DEVICE_H
 
-#include "Core/BartOS.h"
+#include "Kernel/BartOS.h"
 
 namespace BartOS
 {
