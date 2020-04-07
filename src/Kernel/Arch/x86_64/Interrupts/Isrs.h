@@ -48,7 +48,7 @@ namespace Isrs
     d(31,   RESERVED10,         "",                                 "",             false)  \
 
 //! Declate the exception enum
-#define DECLARE_EXCEPTION_ENUM(code, enumeration, mnemonic, type, errorcode)  const IsrCode JOIN(EXCEPTION_, enumeration) = code;
+#define DECLARE_EXCEPTION_ENUM(code, enumeration, mnemonic, type, errorcode)  const InterruptCode JOIN(EXCEPTION_, enumeration) = code;
 
 //! Declare the exception mnemonics
 #define DECLARE_EXCEPTION_MNEMONICS(code, enumeration, mnemonic, type, errorcode) mnemonic,
@@ -61,22 +61,22 @@ namespace Isrs
 
 constexpr uint16_t NUM_OF_GATES = 256;
 
-using IsrCode = uint8_t;
+using InterruptCode = uint8_t;
 
 ISR_LIST(DECLARE_EXCEPTION_ENUM)
 
 /*
  *  @brief Get the Isr mnemonic
  *
- *  @param isrCode the isr code.
+ *  @param InterruptCode the interrupt code.
  *
  *  @return the mnemonic.
  */
-inline const char *GetIsrMnemonic(const IsrCode isrCode)
+inline const char *GetIsrMnemonic(const InterruptCode interruptCode)
 {
     static const char *isrToStringArray[] = { ISR_LIST(DECLARE_EXCEPTION_MNEMONICS) };
 
-    return isrToStringArray[isrCode];
+    return isrToStringArray[interruptCode];
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -84,15 +84,15 @@ inline const char *GetIsrMnemonic(const IsrCode isrCode)
 /*
  *  @brief Get the Isr type
  *
- *  @param isrCode the isr code.
+ *  @param interruptCode the interrupt code.
  *
  *  @return the type.
  */
-inline const char *GetIsrType(const IsrCode isrCode)
+inline const char *GetIsrType(const InterruptCode interruptCode)
 {
     static const char *isrToTypeArray[] = { ISR_LIST(DECLARE_EXCEPTION_TYPE) };
 
-    return isrToTypeArray[isrCode];
+    return isrToTypeArray[interruptCode];
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -100,15 +100,15 @@ inline const char *GetIsrType(const IsrCode isrCode)
 /*
  *  @brief Get isr is error code present
  *
- *  @param isrCode the isr code.
+ *  @param interruptCode the interrupt code.
  *
  *  @return isr error code present.
  */
-inline IsrCode GetErrorCodePresent(const IsrCode isrCode)
+inline InterruptCode GetErrorCodePresent(const InterruptCode interruptCode)
 {
     static const bool isrToErrorCodePresentArray[] = { ISR_LIST(DECLARE_EXCEPTION_IS_ERROR_CODE) };
 
-    return isrToErrorCodePresentArray[isrCode];
+    return isrToErrorCodePresentArray[interruptCode];
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -118,11 +118,39 @@ inline IsrCode GetErrorCodePresent(const IsrCode isrCode)
  *
  *  @return exception ISR count.
  */
-inline IsrCode GetExceptionCount()
+inline InterruptCode GetExceptionCount()
 {
-    constexpr bool isrCountArray[] = { ISR_LIST(DECLARE_EXCEPTION_IS_ERROR_CODE) };
+    static const bool isrCountArray[] = { ISR_LIST(DECLARE_EXCEPTION_IS_ERROR_CODE) };
 
     return ARRAY_SIZE(isrCountArray);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+/*
+ *  @brief  Is interrupt an exception
+ *
+ *  @param interruptCode the interrupt code.
+ *
+ *  @return whether interrupt is an exception.
+ */
+inline bool IsException(const InterruptCode interruptCode)
+{
+    return interruptCode < GetExceptionCount();
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+/*
+ *  @brief  Get Irq code.
+ *
+ *  @param interruptCode the interrupt code.
+ *
+ *  @return the irq code.
+ */
+inline const InterruptCode GetIrqCode(const InterruptCode interruptCode)
+{
+    return interruptCode - GetExceptionCount();
 }
 
 // ---------------------------------------------------------------------------------------------------------

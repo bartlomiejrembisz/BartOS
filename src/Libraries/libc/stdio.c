@@ -4,7 +4,7 @@
 
 int putchar(int c)
 {
-    outb(0xe9, c);
+    out_byte(0xe9, c);
     return c;
 }
 

@@ -12,24 +12,35 @@ namespace BartOS
 namespace x86_64
 {
 
+namespace CPU
+{
+
 /*
- *  @brief The CPU class
+ *  @brief Disable interrupts for the lifetime of this object.
  */
-class CPU
+class InterruptDisabler
 {
 public:
-    //! Abort the execution of the kernel.
-    static void Abort();
+    //! Constructor
+    InterruptDisabler();
 
-    //! Disable interrupts.
-    static void Cli();
-
-    //! Enable interrupts.
-    static void Sti();
-
-    //! Halt the CPU.
-    static void Hlt();
+    //! Destructor
+    ~InterruptDisabler();
 };
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+//! Disable interrupts.
+void Cli();
+
+//! Enable interrupts.
+void Sti();
+
+//! Halt the CPU.
+void Hlt();
+
+} // namespace CPU
 
 } // namespace x86
 

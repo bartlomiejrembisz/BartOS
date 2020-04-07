@@ -5,6 +5,16 @@
 #include <stddef.h>
 #include <limits.h>
 
+//! New and delete can't be in a namespace.
+void *operator new(size_t size);
+void *operator new[](size_t size);
+void operator delete(void *ptr);
+void operator delete[](void *ptr);
+void operator delete(void *ptr, size_t size);
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
 namespace BartOS
 {
 

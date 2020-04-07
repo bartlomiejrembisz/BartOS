@@ -376,9 +376,20 @@ void InterruptDescriptorTable::Initialize()
     m_gates[254].Set(Isrs::interrupt_request_handler_254, 0);
     m_gates[255].Set(Isrs::interrupt_request_handler_255, 0);
 
+    // remap PIC
+    out_byte(0x20, 0x11);
+    out_byte(0xA0, 0x11);
+    out_byte(0x21, 0x20);
+    out_byte(0xA1, 0x28);
+    out_byte(0x21, 0x04);
+    out_byte(0xA1, 0x02);
+    out_byte(0x21, 0x01);
+    out_byte(0xA1, 0x01);
+    out_byte(0x21, 0x0);
+    out_byte(0xA1, 0x0);
 
-    __asm__ __volatile__ ("lidt %0" : : "m" (m_descriptor));
-    //load_idt(&m_descriptor);
+    //__asm__ __volatile__ ("lidt %0" : : "m" (m_descriptor));
+    load_idt(&m_descriptor);
 
     x86_64::CPU::Sti();
 

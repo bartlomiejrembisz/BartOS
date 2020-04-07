@@ -206,15 +206,19 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 			continue;
 
 		case 'p':
+        {
+			const char * addr_prefix = "0x";
+			const size_t addr_prefix_len = strlen(addr_prefix);
 			if (field_width == -1) {
-				field_width = 2 * sizeof(void *);
+				field_width = (2 * sizeof(void *)) + strlen(addr_prefix);
 				flags |= ZEROPAD;
 			}
+			str = strncpy(str, addr_prefix, addr_prefix_len);
 			str = number(str,
 				     (unsigned long)va_arg(args, void *), 16,
 				     field_width, precision, flags);
 			continue;
-
+        }
 		case 'n':
 			if (qualifier == 'l') {
 				long *ip = va_arg(args, long *);

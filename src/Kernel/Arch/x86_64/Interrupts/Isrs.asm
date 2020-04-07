@@ -1,6 +1,6 @@
 bits 64
 
-extern InterruptHandler
+extern HandleInterrupt
 
 %macro no_error_code_interrupt_handler 1
 global interrupt_request_handler_%1
@@ -42,7 +42,7 @@ common_isr_stub:
     mov es, ax
     mov ss, ax
 
-    call InterruptHandler
+    call HandleInterrupt
 
     ; Restore segments
     pop rax
