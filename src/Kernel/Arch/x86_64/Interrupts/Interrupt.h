@@ -87,19 +87,13 @@ public:
 
     /*
      *  @brief On register callback
-     *
-     *  @retval STATUS_CODE_SUCCESS;
-     *  @retval ...
      */
-    virtual StatusCode OnRegister() const;
+    virtual void OnRegister() const;
 
     /*
      *  @brief On unregister callback
-     *
-     *  @retval STATUS_CODE_SUCCESS;
-     *  @retval ...
      */
-    virtual StatusCode OnUnregister() const;
+    virtual void OnUnregister() const;
 
     const void              *m_pUserData;
     const char              *m_pName;

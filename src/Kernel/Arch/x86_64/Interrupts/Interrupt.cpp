@@ -39,18 +39,20 @@ InterruptHandler::~InterruptHandler()
 StatusCode InterruptHandler::Handle(const InterruptContext &interruptContext) const
 {
     kprintf("Handled IRQ %u - %s", Isrs::GetIrqCode(interruptContext.interrupt_num), (m_pName) ? m_pName : "");
+
+    return STATUS_CODE_SUCCESS;
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 
-StatusCode InterruptHandler::OnRegister() const
+void InterruptHandler::OnRegister() const
 {
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
-StatusCode InterruptHandler::OnUnregister() const
+void InterruptHandler::OnUnregister() const
 {
 }
 
@@ -93,9 +95,15 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
 
         const InterruptHandler *pInterruptHandler = g_pInterruptHandlers[Isrs::GetIrqCode(interruptContext.interrupt_num)];
         if (pInterruptHandler)
-            pInterruptHandler->Handle(interruptContext);
+        {
+            const StatusCode statusCode = pInterruptHandler->Handle(interruptContext);
+            if (STATUS_CODE_SUCCESS != statusCode)
+                kprintf("Interrupt Handler failed, status code=%u", statusCode);
+        }
         else
+        {
             kprintf("Undefined IRQ handler %u", Isrs::GetIrqCode(interruptContext.interrupt_num));
+        }
     }
 
 

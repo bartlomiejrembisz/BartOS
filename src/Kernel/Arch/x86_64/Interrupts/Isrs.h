@@ -148,7 +148,7 @@ inline bool IsException(const InterruptCode interruptCode)
  *
  *  @return the irq code.
  */
-inline const InterruptCode GetIrqCode(const InterruptCode interruptCode)
+inline InterruptCode GetIrqCode(const InterruptCode interruptCode)
 {
     return interruptCode - GetExceptionCount();
 }
