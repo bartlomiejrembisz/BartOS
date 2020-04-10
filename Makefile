@@ -1,7 +1,7 @@
 DIRECTIVES			:= 
 ARCH				:= x86_64
 CC					:= /home/bartek/opt/cross/bin/$(ARCH)-elf-gcc
-GCC_FLAGS			:= -fpic -ffreestanding $(DIRECTIVES) -lgcc -g -Wall -Wextra -mno-red-zone -mno-80387 -mno-sse -mno-sse2 -mno-mmx
+GCC_FLAGS			:= -m64 -ffreestanding $(DIRECTIVES) -lgcc -g -Wall -Wextra -mno-red-zone -mno-80387 -mno-sse -mno-sse2 -mno-mmx -mcmodel=kernel -fno-PIC -mno-red-zone
 ASSEMBLER_FLAGS		:= -felf64 -F dwarf -g
 C_FLAGS				:= -std=c99 $(GCC_FLAGS)
 CXX_FLAGS 			:= -std=c++17 $(GCC_FLAGS) -fno-exceptions -fno-rtti
@@ -41,7 +41,7 @@ KERNEL_NAME			:= BartOS
 KERNEL_DIR			:= $(BIN)/$(KERNEL_NAME).bin
 KERNEL_ISO			:= $(BIN)/$(KERNEL_NAME).iso
 
-QEMU_FLAGS			:= -cdrom $(KERNEL_ISO) -m 4G -d int -D debug.log -no-reboot -vga std
+QEMU_FLAGS			:= -cdrom $(KERNEL_ISO) -m 4G -d int -D debug.log -no-reboot -no-shutdown -vga std
 
 iso: build
 	@mkdir -p isofiles/boot/grub

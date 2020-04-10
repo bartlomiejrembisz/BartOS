@@ -1,5 +1,6 @@
-section .text
+bits 64
 
+section .text
 ; Load the global descriptor table.
 ; rdi = pointer to global_descriptor
 ; rsi = code_off
