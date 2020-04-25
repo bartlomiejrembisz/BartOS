@@ -1,20 +1,5 @@
 bits 32
 KERNEL_VIRTUAL_BASE equ 0xFFFFFFFFC0000000
-LAST_PAGE_OFFSET equ (511 * 8)
-
-section .multiboot
-header_start:
-    dd 0xe85250d6                ; magic number (multiboot 2)
-    dd 0                         ; architecture 0 (protected mode i386)
-    dd header_end - header_start ; header lengthmagic number' lets bootloader find the header
-
-    dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
-
-    dw 0    ; type
-
-    dw 0    ; flags
-    dd 8    ; size
-header_end:
 
 section .bss
 align 16
@@ -25,22 +10,31 @@ stack_top:
 
 section .data
 align 4096
+global p4_table
 p4_table:
     dq p3_table - KERNEL_VIRTUAL_BASE + 0b11
-    times (510) dq 0;
+    times (510) dq 0
     dq p3_table - KERNEL_VIRTUAL_BASE + 0b11
 
 align 4096
 p3_table:
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
-    times (510) dq 0;
+    times (510) dq 0
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
 
 align 4096
 p2_table:
     dq 0x0000000000000000 + 0x83
     dq 0x0000000000200000 + 0x83
-    times (510) dq 0
+    times (509) dq 0
+    dq p1_temp_map_table - KERNEL_VIRTUAL_BASE + 0b11
+
+; Last 2MB of the kernel address space are used for temporary mappings
+; This table is used for that mapping.
+align 4096
+global p1_temp_map_table
+p1_temp_map_table:
+    times (512) dq 0
 
 section .rodata
 gdt64:
@@ -48,7 +42,9 @@ gdt64:
 .code: equ $ - gdt64
     dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; code segment
 .pointer:
+.size:
     dw $ - gdt64 - 1
+.addr:
     dq gdt64 - KERNEL_VIRTUAL_BASE
 
 section .text
@@ -56,6 +52,10 @@ global _start
 _start:
     cli
     cld
+
+    ; push multiboot2 magic and boot_info respectively.
+    mov edi, eax
+    mov esi, ebx
 
     ; load the 64-bit GDT
     lgdt [gdt64.pointer - KERNEL_VIRTUAL_BASE]
@@ -98,10 +98,33 @@ long_mode_start:
     ; Set up the stack for C, stack grows downwards.
     mov rsp, stack_top
 
+    ; unmap identity mapping
+    mov rax, 0
+    mov [p4_table], rax
+    mov [p3_table], rax
+    ; reload cr3 to flush entire tlb
+    mov rax, p4_table - KERNEL_VIRTUAL_BASE
+    mov cr3, rax
+
+    ; reload the gdt with virtual address.
+    mov rax, gdt64.addr
+    mov rbx, KERNEL_VIRTUAL_BASE
+    add rax, rbx
+    mov [gdt64.addr], rax
+    lgdt [gdt64.pointer]
+
+    ; adjust multiboot info address.
+    add rsi, rbx
+
+    push rdi
+    push rsi
+
     ; Run global constructors
     extern _init
     call _init
 
+    pop rsi
+    pop rdi
     ; Enter the high-level kernel.
     extern kernel_main
     call kernel_main

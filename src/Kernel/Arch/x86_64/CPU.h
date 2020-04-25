@@ -2,7 +2,6 @@
 #define CPU_H
 
 #include "Kernel/BartOS.h"
-#include "Kernel/multiboot.h"
 
 #include "Libraries/Misc/Singleton.h"
 

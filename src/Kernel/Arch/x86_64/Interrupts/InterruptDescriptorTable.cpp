@@ -105,7 +105,7 @@ void Gate::Set(void(*isr_handler)(), const uint8_t interruptStackTable)
 // ---------------------------------------------------------------------------------------------------------
 
 InterruptDescriptorTable::InterruptDescriptorTable() :
-    m_descriptor { .m_size = sizeof(m_gates), .m_address = (uint64_t) &m_gates }
+    m_descriptor { .m_size = sizeof(m_gates), .m_address = PhysicalAddress((uintptr_t) &m_gates) }
 {
 }
 

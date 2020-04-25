@@ -10,6 +10,7 @@
 #else // CXXSHIM_INTEGRATE_GCC
 
 inline void *operator new (size_t size, void *p) {
+	(void) size;
 	return p;
 }
 

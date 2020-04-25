@@ -87,26 +87,25 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
     }
     else // IRQ
     {
-        kprintf("IRQ %u received\n", Isrs::GetIrqCode(interruptContext.interrupt_num));
-
-        //! Send an EOI ack to the PICs.
-        if (interruptContext.interrupt_num >= 40) out_byte(0xA0, 0x20); // slave
-        out_byte(0x20, 0x20);   // master
+        //kprintf("IRQ %u received\n", Isrs::GetIrqCode(interruptContext.interrupt_num));
 
         const InterruptHandler *pInterruptHandler = g_pInterruptHandlers[Isrs::GetIrqCode(interruptContext.interrupt_num)];
         if (pInterruptHandler)
         {
             const StatusCode statusCode = pInterruptHandler->Handle(interruptContext);
             if (STATUS_CODE_SUCCESS != statusCode)
-                kprintf("Interrupt Handler failed, status code=%u", statusCode);
+                kprintf("Interrupt Handler failed, status code=%u\n", statusCode);
         }
         else
         {
-            kprintf("Undefined IRQ handler %u", Isrs::GetIrqCode(interruptContext.interrupt_num));
+            //kprintf("Undefined IRQ handler %u\n", Isrs::GetIrqCode(interruptContext.interrupt_num));
         }
+
+        //! Send an EOI ack to the PICs.
+        if (interruptContext.interrupt_num >= 40)
+            out_byte(0xA0, 0x20); // slave
+        out_byte(0x20, 0x20);   // master
     }
-
-
 }
 
 } // namespace Interrupt

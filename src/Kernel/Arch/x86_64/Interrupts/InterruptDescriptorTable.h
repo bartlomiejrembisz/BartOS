@@ -19,8 +19,8 @@ namespace IDT
 class [[gnu::packed]] Descriptor
 {
 public:
-    uint16_t    m_size;     // Length of the IDT.
-    uint64_t    m_address;  // Address of the IDT.
+    uint16_t        m_size;     // Length of the IDT.
+    PhysicalAddress m_address;  // Address of the IDT.
 };
 
 // ---------------------------------------------------------------------------------------------------------
@@ -44,8 +44,8 @@ public:
     class Word2 : public Bitmap<64>
     {
     public:
-        typedef BitField<Word2, 32> Reserved;
-        typedef BitField<Reserved, 32> RemainingFunPtr;
+        typedef BitField<Word2, 32> RemainingFunPtr;
+        typedef BitField<RemainingFunPtr, 32> Reserved;
     };
 
     //! Constructor

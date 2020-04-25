@@ -1,23 +1,7 @@
 {
     "files.associations": {
-        "*.tpp": "cpp",
-        "cstdint": "cpp",
-        "cstddef": "cpp",
-        "crti.h": "c",
-        "type_traits": "cpp",
-        "optional": "cpp",
-        "istream": "cpp",
-        "ostream": "cpp",
-        "ratio": "cpp",
-        "system_error": "cpp",
-        "array": "cpp",
-        "functional": "cpp",
-        "tuple": "cpp",
-        "utility": "cpp",
-        "string_view": "cpp",
-        "random": "cpp",
-        "cctype": "cpp"
-    },
-    "terminal.integrated.shell.windows": "cmd.exe",
-    "C_Cpp.dimInactiveRegions": true
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "sstream": "cpp"
+    }
 }

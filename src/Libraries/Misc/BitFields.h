@@ -97,10 +97,27 @@ public:
     }
 
     /*
+     *  @brief Get the underlying value.
+     */
+    constexpr const Type Get() const
+    {
+        return m_value;
+    }
+
+    /*
      *  @brief Get the bit field.
      */
     template<typename BIT_FIELD>
     constexpr typename BIT_FIELD::ValueType Get()
+    {
+        return BIT_FIELD::Get(m_value);
+    }
+
+    /*
+     *  @brief Get the bit field.
+     */
+    template<typename BIT_FIELD>
+    constexpr const typename BIT_FIELD::ValueType Get() const
     {
         return BIT_FIELD::Get(m_value);
     }

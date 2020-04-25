@@ -60,8 +60,8 @@ private:
     //! GDT Descriptor.
     struct [[gnu::packed]] Descriptor
     {
-        uint16_t    m_size;
-        uint64_t    m_address;  // Address of the
+        uint16_t        m_size;
+        PhysicalAddress m_address;  // Address of the GDT
     };
 
     //! GDT Entry.

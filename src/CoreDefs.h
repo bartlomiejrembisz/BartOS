@@ -1,9 +1,10 @@
 #ifndef CORE_DEFS_H
 #define CORE_DEFS_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include <stddef.h>
 #include <limits.h>
+#include <utility>
 
 //! New and delete can't be in a namespace.
 void *operator new(size_t size);
@@ -24,6 +25,12 @@ namespace BartOS
 #define JOIN(a, b) a##b
 
 #define STRINGIZE(a) #a
+
+#define always_inline __attribute__((always_inline))
+
+#define ALIGN_TO_NEXT_BOUNDARY(addr, size) ((addr + (size - 1)) & (-size))
+
+#define ALIGN(addr, size) (addr & (-size))
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
@@ -175,6 +182,17 @@ public:
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
 
+template<typename N>
+class TypeSizeTraits
+{
+public:
+    static constexpr size_t byteSize = sizeof(N);
+    static constexpr size_t bitSize = byteSize * CHAR_BIT;
+};
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
 template<size_t BASE, size_t EXPONENT>
 class StaticPower
 {
@@ -190,6 +208,23 @@ class StaticPower<BASE, 0>
 public:
     static constexpr size_t value = 1;
 };
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+template <typename T>
+constexpr T &Min(const T &a, const T &b)
+{
+    return (b < a) ? b : a;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+template <typename T>
+constexpr const T &Max(const T &a, const T &b)
+{
+    return (b > a) ? b : a;
+}
 
 } // namespace BartOS
 

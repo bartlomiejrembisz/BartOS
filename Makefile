@@ -13,7 +13,7 @@ KERNEL_SRC 			:= $(SRC)/Kernel
 CORE_SRC			:= $(SRC)/Core
 RUNTIME_SRC			:= $(SRC)/Runtime
 OBJ_DIR				:= $(BIN)/obj
-INCLUDE_DIRS		:= ./include ./src
+INCLUDE_DIRS		:= ./include ./src ./include/cxxshim ./src/Libraries/libcpp/
 INCLUDE				:= $(addprefix -I, $(INCLUDE_DIRS))
 LIB					:= ./lib
 
