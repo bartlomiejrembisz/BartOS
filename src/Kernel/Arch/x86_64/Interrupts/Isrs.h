@@ -6,7 +6,7 @@
 namespace BartOS
 {
 
-namespace x86_64
+inline namespace x86_64
 {
 
 namespace Isrs
@@ -61,7 +61,7 @@ namespace Isrs
 
 constexpr uint16_t NUM_OF_GATES = 256;
 
-using InterruptCode = uint8_t;
+using InterruptCode = uint64_t;
 
 ISR_LIST(DECLARE_EXCEPTION_ENUM)
 

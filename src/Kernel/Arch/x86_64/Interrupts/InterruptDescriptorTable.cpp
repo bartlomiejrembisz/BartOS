@@ -9,7 +9,7 @@
 namespace BartOS
 {
 
-namespace x86_64
+inline namespace x86_64
 {
 
 namespace IDT
@@ -388,12 +388,11 @@ void InterruptDescriptorTable::Initialize()
     out_byte(0x21, 0x0);
     out_byte(0xA1, 0x0);
 
-    //__asm__ __volatile__ ("lidt %0" : : "m" (m_descriptor));
     load_idt(&m_descriptor);
 
     x86_64::CPU::Sti();
 
-    kprintf("IDT initialized\n");
+    kprintf("\nIDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
 }
 
 // ---------------------------------------------------------------------------------------------------------

@@ -77,7 +77,7 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
         x86_64::CPU::Hlt();
     }
 
-    kprintf("Kernel P4 Table: %p\n", MM::Vmm::Get().m_pKernelP4Table);
+    kprintf("\nKernel P4 Table: %p\n", MM::Vmm::Get().m_pKernelP4Table);
 
     x86_64::CPU::Sti();
 

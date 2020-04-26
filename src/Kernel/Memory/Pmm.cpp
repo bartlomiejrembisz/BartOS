@@ -36,6 +36,7 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
     if ((!pMmapTag) && (MULTIBOOT_TAG_TYPE_MMAP == pMmapTag->type))
         return STATUS_CODE_INVALID_PARAMETER;
 
+    kprintf("\nPMM:\n");
     kprintf("Physical memory map:\n");
 
     const multiboot_mmap_entry *pMmapEntry;
@@ -54,6 +55,10 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
             m_memoryPool.AddMemoryRegion(memoryRegion);
         }
     }
+
+    kprintf("PMM initialized. Pool start=%p, Page count=%u, Page handle size=%u\n", m_memoryPool.m_pPool, m_memoryPool.m_poolSize,
+            sizeof(PhysicalPage));
+    kprintf("Memory used by PMM: %u MiB\n", (sizeof(PhysicalPage) * m_memoryPool.m_poolSize) / MiB);
 
     return STATUS_CODE_SUCCESS;
 }

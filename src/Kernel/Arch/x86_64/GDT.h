@@ -9,7 +9,7 @@
 namespace BartOS
 {
 
-namespace x86_64
+inline namespace x86_64
 {
 
 class GlobalDescriptorTable : public Singleton<GlobalDescriptorTable>

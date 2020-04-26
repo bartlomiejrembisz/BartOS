@@ -5,7 +5,7 @@
 namespace BartOS
 {
 
-namespace x86_64
+inline namespace x86_64
 {
 
 namespace
@@ -81,7 +81,7 @@ void GlobalDescriptorTable::Initialize()
 
     load_gdt(&m_descriptor, kernelCodeOffset, kernelDataOffset);
 
-    kprintf("GDT initialized\n");
+    kprintf("\nGDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
 }
 
 // ---------------------------------------------------------------------------------------------------------
