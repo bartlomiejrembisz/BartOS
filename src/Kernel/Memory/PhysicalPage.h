@@ -34,9 +34,6 @@ public:
      */
     static constexpr uint16_t GetSize();
 
-    //! RefCounter interface
-    static void OnDie(const Parent &object);
-
     frg::default_list_hook<PhysicalPage> m_freeListHook;    ///< frg intrusive list interface.
 
 private:
@@ -74,6 +71,9 @@ private:
      *  @return reference to this object.
      */
     PhysicalPage &operator=(PhysicalPage &&rhs);
+
+    //! RefCounter interface
+    static void OnDie(Parent &object);
 
     PhysicalAddress m_addr;     ///< The physical address of the page.
 

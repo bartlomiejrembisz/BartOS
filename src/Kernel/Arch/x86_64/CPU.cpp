@@ -157,21 +157,35 @@ InterruptDisabler::~InterruptDisabler()
 
 void Cli()
 {
-    asm volatile("cli");
+    asm __volatile__("cli");
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void Sti()
 {
-    asm volatile("sti");
+    asm __volatile__("sti");
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void Hlt()
 {
-    asm volatile("hlt");
+    asm __volatile__("hlt");
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void Invlpg(const uintptr_t virtualAddress)
+{
+    __asm__ __volatile__("invlpg (%%eax)" : : "a" (virtualAddress));
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void Invlpg(const VirtualAddress virtualAddress)
+{
+    Invlpg(virtualAddress.Get());
 }
 
 } // namespace CPU

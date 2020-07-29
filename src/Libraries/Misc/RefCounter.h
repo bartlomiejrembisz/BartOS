@@ -40,7 +40,7 @@ public:
 
 protected:
     //! Constructor
-    RefCounter() : m_ref(1) {}
+    RefCounter() : m_ref(0) {}
 
     //! Copy constructor deleted
     RefCounter(const RefCounter<TYPE> &rhs) = delete;
@@ -59,7 +59,7 @@ protected:
 
     virtual ~RefCounter() {}
 
-    static void OnDie(const RefCounter<TYPE> &object)
+    static void OnDie(RefCounter<TYPE> &object)
     {
         // noop.
     }
@@ -80,6 +80,7 @@ protected:
      */
     uint16_t DecrementRefCount()
     {
+        ASSERT(m_ref > 0);
         if (0 == --m_ref)
             TYPE::OnDie(*this);
 

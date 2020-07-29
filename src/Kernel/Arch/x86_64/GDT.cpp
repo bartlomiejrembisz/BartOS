@@ -81,7 +81,7 @@ void GlobalDescriptorTable::Initialize()
 
     load_gdt(&m_descriptor, kernelCodeOffset, kernelDataOffset);
 
-    kprintf("\nGDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
+    kprintf("[GDT] GDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
 }
 
 // ---------------------------------------------------------------------------------------------------------

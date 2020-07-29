@@ -41,11 +41,29 @@ MemoryPool::MemoryPool() :
 
 // ---------------------------------------------------------------------------------------------------------
 
+void MemoryPool::Initialize()
+{
+    const PhysicalAddress kernelEndAddr = GetLastUsedMemoryAddress();
+    //! Increment the ref counter for every kernel page and remove from free list.
+    for (PhysicalPage &physicalPage : Range(m_pPool, m_poolSize))
+    {
+        if (physicalPage.GetAddress() < kernelEndAddr)
+        {
+            physicalPage.IncrementRefCount();
+            m_freeList.erase(&physicalPage);
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
 {
     const uintptr_t lastUsedMemoryAddr = GetLastUsedMemoryAddress();
-    if ((memoryRegion.m_addr.Get() + memoryRegion.m_size) < lastUsedMemoryAddr)
-        return;
 
     PhysicalAddress newPageAddr(ALIGN_TO_NEXT_BOUNDARY(Max(lastUsedMemoryAddr, memoryRegion.m_addr.Get()), PAGE_SIZE));
     VirtualAddress pageObjectAddr;
@@ -98,27 +116,86 @@ const PhysicalPage *MemoryPool::AllocatePage()
 
 // ---------------------------------------------------------------------------------------------------------
 
+const MemoryPool::PhysicalRange MemoryPool::AllocateRange(const size_t nPages)
+{
+    // TODO: FINISH THIS, SMH.
+
+    PhysicalPage *pPhysicalPage = m_freeList.front();
+
+    for (; pPhysicalPage < m_freeList.back(); pPhysicalPage = pPhysicalPage->m_freeListHook.next)
+    {
+        bool isContiguous = false;
+        PhysicalPage *pTempPage = pPhysicalPage->m_freeListHook.next;
+        for (size_t i = 1; i < nPages - 1; ++i)
+        {
+            // If the address of the nth page minus (i * PAGE_SIZE) equals the first page, then it's contiguous
+            if ((pTempPage->GetAddress() - (i * PAGE_SIZE)) == pPhysicalPage->GetAddress())
+            {
+                isContiguous = true;
+            }
+            else
+            {
+                break;
+            }
+            
+        }
+
+        if (isContiguous)
+        {
+            PhysicalRange physicalRange;
+            physicalRange.m_pPhysicalPage = pPhysicalPage;
+            physicalRange.m_nPages = nPages;
+
+            return physicalRange;
+        }
+    }
+
+    return PhysicalRange();
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 void MemoryPool::ReturnPage(const PhysicalPage * const pPhysicalPage)
 {
     //! Safe to const cast because we know the page came from the pool.
     PhysicalPage *pTempPage = const_cast<PhysicalPage *>(pPhysicalPage);
 
     pTempPage->DecrementRefCount();
-
-    m_freeList.push_back(pTempPage);
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
-const RefPtr<PhysicalPage> MemoryPool::GetPhysicalPage(const uintptr_t pageAddr)
+void MemoryPool::ReturnPage(const PhysicalAddress pageAddress)
 {
+    PhysicalPage *pTempPage = const_cast<PhysicalPage *>(GetPhysicalPage(pageAddress));
+    pTempPage->DecrementRefCount();
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void MemoryPool::AllocateRange(const PhysicalRange * const pPhysicalRange)
+{
+    ReturnPage(pPhysicalRange->m_pPhysicalPage);
+
+    uintptr_t pageBaseAddress = pPhysicalRange->m_pPhysicalPage->GetAddress().Get();
+    for (size_t i = 1; i < pPhysicalRange->m_nPages; i++)
+    {
+        ReturnPage(PhysicalAddress(pageBaseAddress + (i * PAGE_SIZE)));
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+const PhysicalPage *MemoryPool::GetPhysicalPage(const PhysicalAddress pageAddr)
+{
+    // TODO: Optimize with binary search or smth.
     for (PhysicalPage &physicalPage : Range(m_pPool, m_poolSize))
     {
-        if (physicalPage.m_addr.Get() == pageAddr)
-            return RefPtr<PhysicalPage>(&physicalPage);
+        if (physicalPage.m_addr == pageAddr.PageAddress(PAGE_SIZE))
+            return &physicalPage;
     }
 
-    return RefPtr<PhysicalPage>();
+    return nullptr;
 }
 
 } // namespace MM

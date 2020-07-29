@@ -36,6 +36,19 @@ public:
         size_t          m_size;     ///< The size of the region.
     };
 
+    /*
+     *  @brief The physical memory range.
+     */
+    class PhysicalRange
+    {
+    public:
+        //! Constructor
+        PhysicalRange();
+
+        PhysicalPage    *m_pPhysicalPage;
+        size_t          m_nPages;
+    };
+
 private:
     //! The free list typedef.
     using PhysicalPageFreeList = 
@@ -57,6 +70,9 @@ private:
     MemoryPool &operator=(const MemoryPool &rhs) = delete;
     MemoryPool &operator=(MemoryPool &&rhs) = delete;
 
+    //! Initialize the memory pool.
+    void Initialize();
+
     /*
      *  @brief Divide memory region into page sizes and add to pool.
      * 
@@ -72,11 +88,34 @@ private:
     const PhysicalPage *AllocatePage();
 
     /*
-     *  @brief Allocate a physical page.
+     *  @brief Allocate a physical page range.
+     * 
+     *  @param  nPages the amount of physically contiguous pages.
+     * 
+     *  @return pointer to the allocated page.
+     */
+    const PhysicalRange AllocateRange(const size_t nPages);
+
+    /*
+     *  @brief Return a physical page.
      * 
      *  @param pPhysicalPage pointer to the allocated page.
      */
     void ReturnPage(const PhysicalPage * const pPhysicalPage);
+
+    /*
+     *  @brief Return a physical page.
+     * 
+     *  @param pageAddress the address of the page.
+     */
+    void ReturnPage(const PhysicalAddress pageAddress);
+
+    /*
+     *  @brief Return a physical page range.
+     * 
+     *  @param  pPhysicalRange pointer to the physical range.
+     */
+    void AllocateRange(const PhysicalRange * const pPhysicalRange);
 
     /*
      *  @brief Get a physical page from the pool.
@@ -85,7 +124,7 @@ private:
      * 
      *  @return pointer to the physical page.
      */
-    const RefPtr<PhysicalPage> GetPhysicalPage(const uintptr_t pageAddr);
+    const PhysicalPage *GetPhysicalPage(const PhysicalAddress pageAddr);
 
     PhysicalPage            *m_pPool;       ///< Physical page pool.
     size_t                  m_poolSize;     ///< The size of the pool.
@@ -100,6 +139,15 @@ private:
 inline MemoryPool::MemoryRegion::MemoryRegion() :
     m_addr(0),
     m_size(0)
+{
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+inline MemoryPool::PhysicalRange::PhysicalRange() :
+    m_pPhysicalPage(nullptr),
+    m_nPages(0)
 {
 }
 

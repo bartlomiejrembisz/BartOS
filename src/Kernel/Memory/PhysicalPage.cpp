@@ -1,5 +1,7 @@
 #include "PhysicalPage.h"
 
+#include "Pmm.h"
+
 namespace BartOS
 {
 
@@ -31,6 +33,15 @@ PhysicalPage &PhysicalPage::operator=(PhysicalPage &&rhs)
 
 // ---------------------------------------------------------------------------------------------------------
 
+void PhysicalPage::OnDie(Parent &object)
+{
+    PhysicalPage &physicalPage = static_cast<PhysicalPage &>(object);
+
+    Pmm::Get().ReturnPage(&physicalPage);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 PhysicalAddress PhysicalPage::GetAddress() const
 {
     return m_addr;
@@ -41,13 +52,6 @@ PhysicalAddress PhysicalPage::GetAddress() const
 constexpr uint16_t PhysicalPage::GetSize()
 {
     return m_pageSize;
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-void PhysicalPage::OnDie(const Parent &object)
-{
-    // noop for now.
 }
 
 } // namespace MM

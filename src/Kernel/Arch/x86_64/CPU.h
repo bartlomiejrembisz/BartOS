@@ -248,6 +248,12 @@ void Sti();
 //! Halt the CPU.
 void Hlt();
 
+//! Invalidate the page in the TLB;
+void Invlpg(const uintptr_t virtualAddress);
+
+//! Invalidate the page in the TLB;
+void Invlpg(const VirtualAddress virtualAddress);
+
 } // namespace CPU
 
 } // namespace x86

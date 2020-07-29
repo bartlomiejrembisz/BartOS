@@ -17,6 +17,16 @@ namespace MM
 class Pmm : public Singleton<Pmm>
 {
 public:
+    /*
+     *  @brief The memory stats.
+     */
+    struct MemoryStats
+    {
+    public:
+        size_t m_totalMemory;
+        size_t m_usedMemory;
+    };
+
     //! Constructor
     Pmm();
 
@@ -24,6 +34,27 @@ public:
      *  @brief Initialize the physical 
      */
     StatusCode Initialize(const multiboot_tag_mmap *pMmapTag);
+
+    /*
+     *  @brief Allocate a physical page.
+     * 
+     *  @return pointer to the allocated page.
+     */
+    const PhysicalPage *AllocatePage();
+
+    /*
+     *  @brief Return a physical page.
+     * 
+     *  @param pPhysicalPage pointer to the allocated page.
+     */
+    void ReturnPage(const PhysicalPage * const pPhysicalPage);
+
+    /*
+     *  @brief Get the memory stats.
+     * 
+     *  @return the memory stats.
+     */
+    MemoryStats GetMemoryStats();
 
 private:
     MemoryPool  m_memoryPool;       ///< The physical memory pool.

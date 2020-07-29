@@ -60,7 +60,7 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     }
     
     kprintf("BartOS by Bartlomiej Rembisz\n");
-    kprintf("Kernel mapping:\n");
+    kprintf("Kernel loaded:\n");
     kprintf("Virtual memory\t\t\t\tPhysical memory\n");
     kprintf("%p => %p\t", __kernel_virtual_start, __kernel_virtual_end);
     kprintf("%p => %p\n", __kernel_physical_start, __kernel_physical_end);
@@ -73,7 +73,7 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     StatusCode statusCode = MM::Pmm::Get().Initialize(GetMultiboot2Tag<multiboot_tag_mmap>(MULTIBOOT_TAG_TYPE_MMAP));
     if (STATUS_CODE_SUCCESS != statusCode)
     {
-        kprintf("Failed to initialize the physical memory manager, status code=%u - %s", statusCode, "");
+        kprintf("[PMM] Failed to initialize the physical memory manager, status code=%u - %s", statusCode, "");
         x86_64::CPU::Hlt();
     }
 

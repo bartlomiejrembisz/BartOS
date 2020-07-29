@@ -36,15 +36,14 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
     if ((!pMmapTag) && (MULTIBOOT_TAG_TYPE_MMAP == pMmapTag->type))
         return STATUS_CODE_INVALID_PARAMETER;
 
-    kprintf("\nPMM:\n");
-    kprintf("Physical memory map:\n");
+    kprintf("[PMM] Physical memory map:\n");
 
     const multiboot_mmap_entry *pMmapEntry;
     for (pMmapEntry = &pMmapTag->entries;
         (const multiboot_uint8_t *) pMmapEntry < (((const multiboot_uint8_t *)pMmapTag) + pMmapTag->size);
         pMmapEntry = (const multiboot_mmap_entry *) (((const multiboot_uint8_t *) pMmapEntry) + pMmapTag->entry_size))
     {
-        kprintf("Memory region start=%p length=%p type=%s\n", pMmapEntry->addr, pMmapEntry->len, memoryToStringArray[pMmapEntry->type - 1]);
+        kprintf("[PMM] Memory region start=%p length=%p type=%s\n", pMmapEntry->addr, pMmapEntry->len, memoryToStringArray[pMmapEntry->type - 1]);
 
         if (MULTIBOOT_MEMORY_AVAILABLE == pMmapEntry->type)
         {
@@ -56,11 +55,27 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
         }
     }
 
-    kprintf("PMM initialized. Pool start=%p, Page count=%u, Page handle size=%u\n", m_memoryPool.m_pPool, m_memoryPool.m_poolSize,
+    m_memoryPool.Initialize();
+
+    kprintf("[PMM] PMM initialized. Pool start=%p, Page count=%u, Page handle size=%u\n", m_memoryPool.m_pPool, m_memoryPool.m_poolSize,
             sizeof(PhysicalPage));
-    kprintf("Memory used by PMM: %u MiB\n", (sizeof(PhysicalPage) * m_memoryPool.m_poolSize) / MiB);
+    kprintf("[PMM] Memory used by PMM: %u MiB\n", (sizeof(PhysicalPage) * m_memoryPool.m_poolSize) / MiB);
 
     return STATUS_CODE_SUCCESS;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+const PhysicalPage *Pmm::AllocatePage()
+{
+    return m_memoryPool.AllocatePage();
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void Pmm::ReturnPage(const PhysicalPage * const pPhysicalPage)
+{
+    m_memoryPool.ReturnPage(pPhysicalPage);
 }
 
 } // namespace MM

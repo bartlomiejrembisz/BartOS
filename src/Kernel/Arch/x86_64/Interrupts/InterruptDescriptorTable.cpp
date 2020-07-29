@@ -392,7 +392,7 @@ void InterruptDescriptorTable::Initialize()
 
     x86_64::CPU::Sti();
 
-    kprintf("\nIDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
+    kprintf("[IDT] IDT initialized. Address=%p size=%u\n", m_descriptor.m_address.Get(), m_descriptor.m_size);
 }
 
 // ---------------------------------------------------------------------------------------------------------

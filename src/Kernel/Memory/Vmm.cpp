@@ -1,4 +1,5 @@
 #include "Vmm.h"
+#include "Kernel/Arch/x86_64/CPU.h"
 
 //! Initial P4 table p4_table symbol exposed from boot.asm
 extern "C" BartOS::MM::PageTable p4_table;
@@ -25,7 +26,69 @@ Vmm::Vmm()
 
 // ---------------------------------------------------------------------------------------------------------
 
+void Vmm::Initialize()
+{
+    
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 StatusCode Vmm::MapPage(PageTable * const pP4Table, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+        const PageFlags pageFlags, const PageSize pageSize)
+{
+    const StatusCode statusCode = MapPageImpl(pP4Table, physicalAddress, virtualAddress, pageFlags, pageSize);
+    if (STATUS_CODE_SUCCESS == statusCode)
+        CPU::Invlpg(virtualAddress);
+
+    return statusCode;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+bool Vmm::IsAddressMapped(const PageTable * const pP4Table, const VirtualAddress &virtualAddress)
+{
+    if (TEMP_ENTRY_ADDR_BASE <= virtualAddress.Get())
+        return true;
+
+    //! Get PTE of the p3 table and check if it exists. If not return false;
+    const PageTableEntry &p4TableEntry = pP4Table->GetPte<TABLE_LEVEL4>(virtualAddress);
+    const PageTable *pP3Table = nullptr;
+    if (!p4TableEntry.IsPresent())
+        return false;
+
+    pP3Table = MapPageLevel<TABLE_LEVEL3>(p4TableEntry.GetPhysicalAddress());
+
+    //! Get PTE of the p2 table and check if it exists. If not return false;
+    const PageTableEntry &p3TableEntry = pP3Table->GetPte<TABLE_LEVEL3>(virtualAddress);
+    const PageTable *pP2Table = nullptr;
+    if (!p3TableEntry.IsPresent())
+        return false;
+    else if (p3TableEntry.IsHugePage())
+        return true;
+
+    pP2Table = MapPageLevel<TABLE_LEVEL2>(p3TableEntry.GetPhysicalAddress());
+
+    //! Get PTE of the p1 table and check if it exists. If not return false;
+    const PageTableEntry &p2TableEntry = pP2Table->GetPte<TABLE_LEVEL2>(virtualAddress);
+    const PageTable *pP1Table = nullptr;
+    if (!p2TableEntry.IsPresent())
+        return false;
+    else if (p2TableEntry.IsHugePage())
+        return true;
+
+    pP1Table = MapPageLevel<TABLE_LEVEL1>(p2TableEntry.GetPhysicalAddress());
+
+    //! Get page and check if it exists. If not return false;
+    const PageTableEntry &p1TableEntry = pP1Table->GetPte<TABLE_LEVEL1>(virtualAddress);
+    if (!p1TableEntry.IsPresent())
+        return false;
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
         const PageFlags pageFlags, const PageSize pageSize)
 {
     ASSERT(pP4Table);
@@ -110,49 +173,6 @@ StatusCode Vmm::MapPage(PageTable * const pP4Table, const PhysicalAddress &physi
     p1TableEntry.SetNoExecute(pageFlags & NO_EXECUTE);
 
     return STATUS_CODE_SUCCESS;
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-bool Vmm::IsAddressMapped(const PageTable * const pP4Table, const VirtualAddress &virtualAddress)
-{
-    if (TEMP_ENTRY_ADDR_BASE <= virtualAddress.Get())
-        return true;
-
-    //! Get PTE of the p3 table and check if it exists. If not return false;
-    const PageTableEntry &p4TableEntry = pP4Table->GetPte<TABLE_LEVEL4>(virtualAddress);
-    const PageTable *pP3Table = nullptr;
-    if (!p4TableEntry.IsPresent())
-        return false;
-    else
-        pP3Table = MapPageLevel<TABLE_LEVEL3>(p4TableEntry.GetPhysicalAddress());
-
-    //! Get PTE of the p2 table and check if it exists. If not return false;
-    const PageTableEntry &p3TableEntry = pP3Table->GetPte<TABLE_LEVEL3>(virtualAddress);
-    const PageTable *pP2Table = nullptr;
-    if (!p3TableEntry.IsPresent())
-        return false;
-    else if (p3TableEntry.IsHugePage())
-        return true;
-    else
-        pP2Table = MapPageLevel<TABLE_LEVEL2>(p3TableEntry.GetPhysicalAddress());
-
-    //! Get PTE of the p1 table and check if it exists. If not return false;
-    const PageTableEntry &p2TableEntry = pP2Table->GetPte<TABLE_LEVEL2>(virtualAddress);
-    const PageTable *pP1Table = nullptr;
-    if (!p2TableEntry.IsPresent())
-        return false;
-    else if (p2TableEntry.IsHugePage())
-        return true;
-    else
-        pP1Table = MapPageLevel<TABLE_LEVEL1>(p2TableEntry.GetPhysicalAddress());
-
-    //! Get page and check if it exists. If not return false;
-    const PageTableEntry &p1TableEntry = pP1Table->GetPte<TABLE_LEVEL1>(virtualAddress);
-    if (!p1TableEntry.IsPresent())
-        return false;
-
-    return true;
 }
 
 // ---------------------------------------------------------------------------------------------------------

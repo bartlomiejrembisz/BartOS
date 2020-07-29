@@ -18,6 +18,9 @@ public:
     //! Constructor
     Vmm();
 
+    //! Initialize the VMM.
+    void Initialize();
+
     /*
      *  @brief Map an address 
      * 
@@ -50,6 +53,21 @@ private:
     static const uint64_t TEMP_ENTRY_ADDR_BASE = 0xFFFFFFFFFFE00000;
 
     static PageTable * const m_pTempMapTable;  ///< Level 1 page table used to map temporary pages. Always mapped as last 2MiB in kernel address space.
+
+    /*
+     *  @brief Map an address 
+     * 
+     *  @param pP4Table pointer to the Level 4 Page Table.
+     *  @param physicalAddress the physical address of the physical page.
+     *  @param virtualAddress the virtual address of the virtual page.
+     *  @param pageFlags the page flags.
+     * 
+     *  @retval STATUS_CODE_SUCCESS
+     *  @retval STATUS_CODE_ALREADY_MAPPED
+     *  @retval ...
+     */
+    StatusCode MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+        const PageFlags pageFlags, const PageSize pageSize);
 
     /*
      *  @brief Map a temporary page level impl.

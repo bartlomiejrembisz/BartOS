@@ -19,34 +19,34 @@ struct [[gnu::packed]] InterruptContext
 {
     // Pushed by the kernel:
     
-    uint64_t m_ds;          ///< The data segment
+    uint64_t            m_ds;          ///< The data segment
 
     //! General purpose registers
-    uint64_t m_r15;
-    uint64_t m_r14;
-    uint64_t m_r13;
-    uint64_t m_r12;
-    uint64_t m_r11;
-    uint64_t m_r10;
-    uint64_t m_r9;
-    uint64_t m_r8;
-    uint64_t m_rbp;
-    uint64_t m_rdi;
-    uint64_t m_rsi;
-    uint64_t m_rdx;
-    uint64_t m_rcx;
-    uint64_t m_rbx;
-    uint64_t m_rax;
+    uint64_t            m_r15;
+    uint64_t            m_r14;
+    uint64_t            m_r13;
+    uint64_t            m_r12;
+    uint64_t            m_r11;
+    uint64_t            m_r10;
+    uint64_t            m_r9;
+    uint64_t            m_r8;
+    uint64_t            m_rbp;
+    uint64_t            m_rdi;
+    uint64_t            m_rsi;
+    uint64_t            m_rdx;
+    uint64_t            m_rcx;
+    uint64_t            m_rbx;
+    uint64_t            m_rax;
 
-    Isrs::InterruptCode m_interruptCode;    ///< The interrupt code.
-    uint64_t m_errorCode;                   ///< The error code.
+    Isrs::InterruptCode m_interruptCode;                ///< The interrupt code.
+    uint64_t            m_errorCode;                    ///< The error code.
 
     // pushed by the CPU:
-    uint64_t m_rip;                         ///< The instruction pointer.
-    uint64_t m_cs;                          ///< The code segment.
-    CPU::RFLAGS m_rflags;                   ///< The rflags.
-    uint64_t m_rsp;                         ///< The stack pointer.
-    uint64_t m_ss;                          ///< The stack segment.
+    uint64_t            m_rip;                          ///< The instruction pointer.
+    uint64_t            m_cs;                           ///< The code segment.
+    CPU::RFLAGS::Type   m_rflags;                       ///< The rflags.
+    uint64_t            m_rsp;                          ///< The stack pointer.
+    uint64_t            m_ss;                           ///< The stack segment.
 };
 
 // ---------------------------------------------------------------------------------------------------------
