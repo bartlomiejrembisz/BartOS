@@ -33,6 +33,14 @@ public:
      */
     explicit VirtualAddress(const uintptr_t address);
 
+    /*
+     *  @brief Constructor
+     *
+     *  @param pObject the object pointer.
+     */
+    template <typename T>
+    explicit VirtualAddress(const T *pObject);
+
     //! Setters
     Layout::Level4::ValueType SetLevel4(const Layout::Level4::ValueType level4);
     Layout::Level3::ValueType SetLevel3(const Layout::Level3::ValueType level3);
@@ -55,6 +63,14 @@ public:
      */
     static VirtualAddress Create(const PhysicalAddress &physicalAddress);
 };
+
+// ---------------------------------------------------------------------------------------------------------
+
+template <typename T>
+VirtualAddress::VirtualAddress(const T *pObject) :
+    Address(reinterpret_cast<uintptr_t >(pObject))
+{
+}
 
 } // namespace BartOS
 

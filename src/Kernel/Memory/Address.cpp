@@ -209,4 +209,4 @@ bool Address<ADDRESS>::operator<=(const Address<ADDRESS> &rhs) const
 template class Address<PhysicalAddress>;
 template class Address<VirtualAddress>;
 
-} // namespace BartOS#
+} // namespace BartOS

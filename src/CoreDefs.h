@@ -26,7 +26,7 @@ namespace BartOS
 
 #define STRINGIZE(a) #a
 
-#define always_inline __attribute__((always_inline))
+#define ALWAYS_INLINE __attribute__((always_inline))
 
 #define ALIGN_TO_NEXT_BOUNDARY(addr, size) ((addr + (size - 1)) & (-size))
 

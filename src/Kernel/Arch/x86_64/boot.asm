@@ -64,7 +64,7 @@ _start:
     push $0
     popf
 
-; enable paging
+    ; enable paging
     ; load P4 to cr3 register
     mov eax, p4_table - KERNEL_VIRTUAL_BASE
     mov cr3, eax

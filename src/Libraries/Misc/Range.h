@@ -38,7 +38,7 @@ public:
 
 private:
     TYPE    *m_pCollection;     ///< The collection pointer.
-    size_t  m_size;   ///< The size of the collection.     
+    size_t  m_size;             ///< The size of the collection.     
 };
 
 } // namespace BartOS

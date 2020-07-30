@@ -168,7 +168,7 @@ bool PageTableEntry::IsNoExecute() const
 
 // ---------------------------------------------------------------------------------------------------------
 
-const BartOS::PhysicalAddress PageTableEntry::SetPhysicalAddress(const BartOS::PhysicalAddress &physicalAddress)
+void PageTableEntry::SetPhysicalAddress(const BartOS::PhysicalAddress &physicalAddress)
 {
     Set<PageTableEntry::PhysicalAddress>(physicalAddress.Get() >> 12);
 }

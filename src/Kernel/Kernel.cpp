@@ -70,6 +70,9 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     x86_64::GDT::Get().Initialize();
     x86_64::IDT::IDT::Get().Initialize();
 
+    // Init kmalloc eternal.
+    init_kmalloc_eternal();
+
     StatusCode statusCode = MM::Pmm::Get().Initialize(GetMultiboot2Tag<multiboot_tag_mmap>(MULTIBOOT_TAG_TYPE_MMAP));
     if (STATUS_CODE_SUCCESS != statusCode)
     {
@@ -77,7 +80,9 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
         x86_64::CPU::Hlt();
     }
 
-    kprintf("\nKernel P4 Table: %p\n", MM::Vmm::Get().m_pKernelP4Table);
+    //kprintf("\nKernel P4 Table: %p\n", MM::Vmm::Get().m_pKernelP4Table);
+
+    MM::Vmm::Get().Initialize();
 
     x86_64::CPU::Sti();
 

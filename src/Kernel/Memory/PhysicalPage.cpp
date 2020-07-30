@@ -47,13 +47,6 @@ PhysicalAddress PhysicalPage::GetAddress() const
     return m_addr;
 }
 
-// ---------------------------------------------------------------------------------------------------------
-
-constexpr uint16_t PhysicalPage::GetSize()
-{
-    return m_pageSize;
-}
-
 } // namespace MM
 
 } // namespace BartOS

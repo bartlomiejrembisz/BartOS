@@ -1,5 +1,6 @@
 #include "Vmm.h"
 #include "Kernel/Arch/x86_64/CPU.h"
+#include "AddressSpace.h"
 
 //! Initial P4 table p4_table symbol exposed from boot.asm
 extern "C" BartOS::MM::PageTable p4_table;
@@ -13,14 +14,14 @@ namespace BartOS
 namespace MM
 {
 
-PageTable *Vmm::m_pKernelP4Table = &p4_table;
-
 PageTable * const Vmm::m_pTempMapTable = &p1_temp_map_table;
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
 
-Vmm::Vmm()
+Vmm::Vmm() :
+    m_kernelAddressSpace(&p4_table),
+    m_isInitialized(false)
 {
 }
 
@@ -28,15 +29,28 @@ Vmm::Vmm()
 
 void Vmm::Initialize()
 {
-    
+    m_kernelAddressSpace.Initialize();
+    m_isInitialized = true;
+
+    kprintf("[VMM] VMM initialized. Pool start=%p, Page count=%u, Page handle size=%u\n", m_kernelAddressSpace.m_pVirtualPages,
+        m_kernelAddressSpace.m_nVirtualPages, sizeof(VirtualPage));
+    kprintf("[VMM] Memory used by VMM: %u KiB\n", (sizeof(VirtualPage) * m_kernelAddressSpace.m_nVirtualPages) / KiB);
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
-StatusCode Vmm::MapPage(PageTable * const pP4Table, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+StatusCode Vmm::MapKernelPage(const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
         const PageFlags pageFlags, const PageSize pageSize)
 {
-    const StatusCode statusCode = MapPageImpl(pP4Table, physicalAddress, virtualAddress, pageFlags, pageSize);
+    return MapPage(m_kernelAddressSpace, physicalAddress, virtualAddress, pageFlags, pageSize);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+StatusCode Vmm::MapPage(AddressSpace &addressSpace, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+        const PageFlags pageFlags, const PageSize pageSize)
+{
+    const StatusCode statusCode = MapPageImpl(addressSpace.m_pPageTable, physicalAddress, virtualAddress, pageFlags, pageSize);
     if (STATUS_CODE_SUCCESS == statusCode)
         CPU::Invlpg(virtualAddress);
 
@@ -45,10 +59,19 @@ StatusCode Vmm::MapPage(PageTable * const pP4Table, const PhysicalAddress &physi
 
 // ---------------------------------------------------------------------------------------------------------
 
-bool Vmm::IsAddressMapped(const PageTable * const pP4Table, const VirtualAddress &virtualAddress)
+bool Vmm::IsKernelAddressMapped(const VirtualAddress &virtualAddress)
+{
+    return IsAddressMapped(m_kernelAddressSpace, virtualAddress);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+bool Vmm::IsAddressMapped(const AddressSpace &addressSpace, const VirtualAddress &virtualAddress)
 {
     if (TEMP_ENTRY_ADDR_BASE <= virtualAddress.Get())
         return true;
+
+    const PageTable * const pP4Table = addressSpace.m_pPageTable;
 
     //! Get PTE of the p3 table and check if it exists. If not return false;
     const PageTableEntry &p4TableEntry = pP4Table->GetPte<TABLE_LEVEL4>(virtualAddress);
@@ -88,6 +111,33 @@ bool Vmm::IsAddressMapped(const PageTable * const pP4Table, const VirtualAddress
 
 // ---------------------------------------------------------------------------------------------------------
 
+void Vmm::EnsureKernelMapped(const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+                  const PageFlags pageFlags, const PageSize pageSize)
+{
+    EnsureMapped(m_kernelAddressSpace, physicalAddress, virtualAddress, pageFlags, pageSize);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void Vmm::EnsureMapped(AddressSpace &addressSpace, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
+                  const PageFlags pageFlags, const PageSize pageSize)
+{
+    if (!IsAddressMapped(addressSpace, virtualAddress))
+        MapPage(addressSpace, physicalAddress, virtualAddress, pageFlags, pageSize);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+PhysicalAddress Vmm::GetEndAddress()
+{
+    if (!m_isInitialized)
+        return PhysicalAddress(0);
+
+    return PhysicalAddress::Create(VirtualAddress(reinterpret_cast<intptr_t>(m_kernelAddressSpace.m_pVirtualPages + m_kernelAddressSpace.m_nVirtualPages)));
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &physicalAddress, const VirtualAddress &virtualAddress,
         const PageFlags pageFlags, const PageSize pageSize)
 {
@@ -100,7 +150,7 @@ StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &p
     PageTable *pP3Table = nullptr;
     if (!p4TableEntry.IsPresent())
     {
-        // TODO: Allocate a physical page.
+        // TODO: Allocate a kernel page.
     }
     else
     {
@@ -112,7 +162,7 @@ StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &p
     PageTable *pP2Table = nullptr;
     if (!p3TableEntry.IsPresent())
     {
-        // TODO: Allocate a physical page.
+        // TODO: Allocate a kernel page.
     }
     else
     {
@@ -124,7 +174,7 @@ StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &p
     PageTable *pP1Table = nullptr;
     if (!p2TableEntry.IsPresent())
     {
-        // TODO: Allocate a physical page.
+        // TODO: Allocate a kernel page.
     }
     else
     {

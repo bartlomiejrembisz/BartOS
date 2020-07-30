@@ -1,6 +1,7 @@
 #include "Interrupt.h"
 
 #include "Kernel/Arch/x86_64/CPU.h"
+#include "Isrs.h"
 
 namespace BartOS
 {
@@ -82,6 +83,11 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
     {
         kprintf("Interrupt No: %u - %s\nInstruction address = %p\n", interruptContext.m_interruptCode,
                 Isrs::GetIsrMnemonic(interruptContext.m_interruptCode), interruptContext.m_rip);
+
+        if (interruptContext.m_interruptCode == Isrs::EXCEPTION_PAGE_FAULT)
+        {
+            kprintf("Page Fault Address: %p\n", CPU::GetCR2());
+        }
 
         if (Isrs::EXCEPTION_INVALID_OPCODE == interruptContext.m_interruptCode)
             CPU::Hlt();

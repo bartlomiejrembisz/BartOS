@@ -20,6 +20,8 @@ class PhysicalPage : public RefCounter<PhysicalPage>
 public:
     typedef RefCounter<PhysicalPage> Parent;    ///< The ref counter parent typedef.
 
+    static constexpr uint16_t m_pageSize = PAGE_SIZE;   ///< The page size.
+
     /*
      *  @brief Get the physical address of the page
      * 
@@ -27,17 +29,9 @@ public:
      */
     PhysicalAddress GetAddress() const;
 
-    /*
-     *  @brief Get the size of the page
-     * 
-     *  @return the size of the page.
-     */
-    static constexpr uint16_t GetSize();
-
     frg::default_list_hook<PhysicalPage> m_freeListHook;    ///< frg intrusive list interface.
 
 private:
-    static constexpr uint16_t m_pageSize = PAGE_SIZE;   ///< The page size.
 
     //! Disable default and copy construction.
     PhysicalPage() = delete;

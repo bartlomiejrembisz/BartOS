@@ -1,7 +1,9 @@
 #include "MemoryPool.h"
 
 #include "Vmm.h"
-#include "Kernel/Multiboot2.h"
+#include "Pmm.h"
+
+#include "KernelAddressSpace.h"
 
 #include <new>
 
@@ -10,28 +12,6 @@ namespace BartOS
 
 namespace MM
 {
-
-namespace
-{
-
-PhysicalAddress GetLastUsedMemoryAddress()
-{
-    PhysicalAddress kernelEndAddr((uintptr_t) __kernel_physical_end);
-    PhysicalAddress bootInfoEnd = PhysicalAddress::Create(VirtualAddress(((uintptr_t) g_pBootInfo) + g_pBootInfo->total_size));
-
-    PhysicalAddress lastUsedAddr;
-    lastUsedAddr.Set(kernelEndAddr.Get());
-
-    if (bootInfoEnd > lastUsedAddr)
-        lastUsedAddr.Set(bootInfoEnd);
-
-    return lastUsedAddr;
-}
-
-} // namespace
-
-// ---------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------
 
 MemoryPool::MemoryPool() :
     m_pPool(nullptr),
@@ -43,63 +23,48 @@ MemoryPool::MemoryPool() :
 
 void MemoryPool::Initialize()
 {
-    const PhysicalAddress kernelEndAddr = GetLastUsedMemoryAddress();
-    //! Increment the ref counter for every kernel page and remove from free list.
-    for (PhysicalPage &physicalPage : Range(m_pPool, m_poolSize))
-    {
-        if (physicalPage.GetAddress() < kernelEndAddr)
-        {
-            physicalPage.IncrementRefCount();
-            m_freeList.erase(&physicalPage);
-        }
-        else
-        {
-            break;
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
 {
-    const uintptr_t lastUsedMemoryAddr = GetLastUsedMemoryAddress();
+    //! Don't process addresses below the kernel physical start since they're memory mapped to something else.
+    PhysicalAddress pagePhysAddr(ALIGN_TO_NEXT_BOUNDARY(memoryRegion.m_addr.Get(), PAGE_SIZE));
 
-    PhysicalAddress newPageAddr(ALIGN_TO_NEXT_BOUNDARY(Max(lastUsedMemoryAddr, memoryRegion.m_addr.Get()), PAGE_SIZE));
-    VirtualAddress pageObjectAddr;
-
+    PhysicalPage *pPhysicalPage;
     if(0 == m_poolSize)
     {
-        pageObjectAddr = VirtualAddress::Create(newPageAddr);
-        m_pPool = static_cast<PhysicalPage *>(pageObjectAddr);
+        //! Set m_pPool to point right after the kernel text and data.
+        pPhysicalPage = static_cast<PhysicalPage *>(VirtualAddress(get_kmalloc_eternal_ptr()));
+        m_pPool = pPhysicalPage;
+
+        //! Make sure the page for the PhysicalPage object is mapped.
+        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage)).PageAddress(PAGE_SIZE_2M),
+                                      VirtualAddress(pPhysicalPage).PageAddress(PAGE_SIZE_2M),
+                                      static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
     }
     else
     {
-        pageObjectAddr.Set(reinterpret_cast<uintptr_t>(m_pPool + m_poolSize + 1));
+        pPhysicalPage = &m_pPool[m_poolSize];
     }
-
+    
     const PhysicalAddress regionEnd(memoryRegion.m_addr.Get() + memoryRegion.m_size);
-    for (; newPageAddr < regionEnd; newPageAddr += PAGE_SIZE)
+
+    for (; pagePhysAddr < regionEnd; pagePhysAddr += PAGE_SIZE)
     {
-        PhysicalPage * pPhysicalPage = static_cast<PhysicalPage *>(pageObjectAddr);
+        //! Check whether the page for the next PhysicalPage object is mapped.
+        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage + 1)).PageAddress(PAGE_SIZE_2M),
+                                      VirtualAddress(pPhysicalPage + 1).PageAddress(PAGE_SIZE_2M),
+                                      static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
 
-        //! Check the page for the next PhysicalPage object is mapped, map it if it isn't.
-        if (!Vmm::Get().IsAddressMapped(Vmm::m_pKernelP4Table, pageObjectAddr + sizeof(PhysicalPage)))
-        {
-            Vmm::Get().MapPage(Vmm::m_pKernelP4Table,
-                               PhysicalAddress::Create(pageObjectAddr + sizeof(PhysicalPage)).PageAddress(PAGE_SIZE_2M),
-                               (pageObjectAddr + sizeof(PhysicalPage)).PageAddress(PAGE_SIZE_2M) ,
-                               static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
-        }
-
-        // Placement to reinitialize.
-        new (pPhysicalPage) PhysicalPage(newPageAddr);
+        // Placement new to reinitialize.
+        new (pPhysicalPage) PhysicalPage(pagePhysAddr);
         ++m_poolSize;
         m_freeList.push_back(pPhysicalPage);
 
-        pageObjectAddr += sizeof(PhysicalPage);
+        ++pPhysicalPage;
     }
-    
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -116,41 +81,59 @@ const PhysicalPage *MemoryPool::AllocatePage()
 
 // ---------------------------------------------------------------------------------------------------------
 
-const MemoryPool::PhysicalRange MemoryPool::AllocateRange(const size_t nPages)
+MemoryPool::PhysicalRange MemoryPool::AllocateRange(const size_t nPages)
 {
-    // TODO: FINISH THIS, SMH.
-
-    PhysicalPage *pPhysicalPage = m_freeList.front();
-
-    for (; pPhysicalPage < m_freeList.back(); pPhysicalPage = pPhysicalPage->m_freeListHook.next)
+    for (PhysicalPage &physicalPage : Range(m_pPool, m_poolSize))
     {
         bool isContiguous = false;
-        PhysicalPage *pTempPage = pPhysicalPage->m_freeListHook.next;
-        for (size_t i = 1; i < nPages - 1; ++i)
+        for (size_t nPage = 0; nPage < nPages; ++nPage)
         {
-            // If the address of the nth page minus (i * PAGE_SIZE) equals the first page, then it's contiguous
-            if ((pTempPage->GetAddress() - (i * PAGE_SIZE)) == pPhysicalPage->GetAddress())
+            PhysicalPage *pPhysicalPage = &physicalPage + nPage;
+            if (pPhysicalPage->m_freeListHook.in_list)
             {
-                isContiguous = true;
+                isContiguous = false;
+                break;
             }
             else
             {
-                break;
+                isContiguous = true;
             }
-            
         }
 
         if (isContiguous)
         {
-            PhysicalRange physicalRange;
-            physicalRange.m_pPhysicalPage = pPhysicalPage;
-            physicalRange.m_nPages = nPages;
+            PhysicalRange physicalRange(&physicalPage, nPages);
 
             return physicalRange;
         }
     }
 
-    return PhysicalRange();
+    return PhysicalRange(nullptr, 0);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange MemoryPool::AllocateRange(const PhysicalAddress physicalAddress, const size_t nPages)
+{
+    PhysicalPage * const pPhysicalPage = const_cast<PhysicalPage *>(FindPhysicalPage(physicalAddress));
+
+    PhysicalRange physicalRange(pPhysicalPage, nPages);
+
+    return physicalRange;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void MemoryPool::InitializePhysicalRange(PhysicalRange &physicalRange)
+{
+    //! Safe to const cast because we know the page came from the pool.
+    for (const PhysicalPage &physicalPage : Range(physicalRange.m_pPhysicalPage, physicalRange.m_nPages))
+    {
+        PhysicalPage &tempPageReference = const_cast<PhysicalPage &>(physicalPage);
+        tempPageReference.IncrementRefCount();
+        if (tempPageReference.m_freeListHook.in_list)
+            m_freeList.erase(&tempPageReference);
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -167,35 +150,113 @@ void MemoryPool::ReturnPage(const PhysicalPage * const pPhysicalPage)
 
 void MemoryPool::ReturnPage(const PhysicalAddress pageAddress)
 {
-    PhysicalPage *pTempPage = const_cast<PhysicalPage *>(GetPhysicalPage(pageAddress));
+    //! Safe to const cast because we know the page came from the pool.
+    PhysicalPage *pTempPage = const_cast<PhysicalPage *>(FindPhysicalPage(pageAddress));
+
     pTempPage->DecrementRefCount();
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
-void MemoryPool::AllocateRange(const PhysicalRange * const pPhysicalRange)
+void MemoryPool::ReturnRange(MemoryPool::PhysicalRange &physicalRange)
 {
-    ReturnPage(pPhysicalRange->m_pPhysicalPage);
+    for (const PhysicalPage &physicalPage : Range(physicalRange.m_pPhysicalPage, physicalRange.m_nPages))
+        ReturnPage(&physicalPage);
 
-    uintptr_t pageBaseAddress = pPhysicalRange->m_pPhysicalPage->GetAddress().Get();
-    for (size_t i = 1; i < pPhysicalRange->m_nPages; i++)
-    {
-        ReturnPage(PhysicalAddress(pageBaseAddress + (i * PAGE_SIZE)));
-    }
+    physicalRange.Clear();
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
-const PhysicalPage *MemoryPool::GetPhysicalPage(const PhysicalAddress pageAddr)
+const PhysicalPage *MemoryPool::FindPhysicalPage(const PhysicalAddress pageAddress)
 {
     // TODO: Optimize with binary search or smth.
     for (PhysicalPage &physicalPage : Range(m_pPool, m_poolSize))
     {
-        if (physicalPage.m_addr == pageAddr.PageAddress(PAGE_SIZE))
+        if (physicalPage.m_addr == pageAddress.PageAddress(PAGE_SIZE))
             return &physicalPage;
     }
 
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+const RefPtr<PhysicalPage> MemoryPool::GetPhysicalPage(const PhysicalAddress pageAddress)
+{
+    //! Safe to const cast because we know the page came from the pool.
+    return RefPtr<PhysicalPage>(const_cast<PhysicalPage *>(FindPhysicalPage(pageAddress)));
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange::PhysicalRange(PhysicalPage * const pPhysicalPage, const size_t nPages) :
+    m_pPhysicalPage(pPhysicalPage),
+    m_nPages(nPages)
+{
+    if (IsInitalized())
+        Pmm::Get().InitializePhysicalRange(*this);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange::PhysicalRange(const PhysicalRange &rhs) :
+    m_pPhysicalPage(rhs.m_pPhysicalPage),
+    m_nPages(rhs.m_nPages)
+{
+    if (IsInitalized())
+        Pmm::Get().InitializePhysicalRange(*this);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange::PhysicalRange(PhysicalRange &&rhs) :
+    m_pPhysicalPage(rhs.m_pPhysicalPage),
+    m_nPages(rhs.m_nPages)
+{
+    rhs.Clear();
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange &MemoryPool::PhysicalRange::operator=(const PhysicalRange &rhs)
+{
+    //! If the object is currently initialized then return to pool
+    ReturnToPool();
+    
+    m_pPhysicalPage = rhs.m_pPhysicalPage;
+    m_nPages = rhs.m_nPages;
+
+    if (IsInitalized())
+        Pmm::Get().InitializePhysicalRange(*this);
+
+    return *this;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+MemoryPool::PhysicalRange &MemoryPool::PhysicalRange::operator=(PhysicalRange &&rhs)
+{
+    //! If the object is currently initialized then return to pool
+    ReturnToPool();
+    
+    m_pPhysicalPage = rhs.m_pPhysicalPage;
+    m_nPages = rhs.m_nPages;
+
+    rhs.Clear();
+
+    return *this;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+void MemoryPool::PhysicalRange::ReturnToPool()
+{
+    if (IsInitalized())
+        Pmm::Get().ReturnRange(*this);
+
+    Clear();
 }
 
 } // namespace MM

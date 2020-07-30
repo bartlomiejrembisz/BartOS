@@ -14,6 +14,8 @@ namespace BartOS
 #define PAGE_SIZE (4 * KiB)
 #define PAGE_SIZE_2M (2 * MiB)
 
+#define MAX_KERNEL_SIZE (1 * GiB)
+
 //! Paging typedefs.
 using TableEntryIndex = uint16_t;
 using PageTableIndex = uint8_t;
@@ -23,7 +25,8 @@ enum PageSize
 {
     PAGE_4K,
     PAGE_2M,
-    PAGE_1G
+    PAGE_1G,
+    INVALID_PAGE_SIZE
 };
 
 //! The page flags.
@@ -55,6 +58,47 @@ extern "C" uintptr_t __kernel_virtual_start[];
 extern "C" uintptr_t __kernel_physical_start[];
 extern "C" uintptr_t __kernel_virtual_end[];
 extern "C" uintptr_t __kernel_physical_end[];
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+/*
+ *  @brief Initialize kmalloc eternal
+ */
+void init_kmalloc_eternal();
+
+/*
+ *  @brief kmalloc eternal
+ * 
+ *  @param size the size to allocate.
+ * 
+ *  @return the memory address of the allocation.
+ */
+void *kmalloc_eternal(const size_t size);
+
+/*
+ *  @brief kmalloc eternal aligned
+ *
+ *  @param size the size to allocate.
+ *  @param alignment the alignment
+ *
+ *  @return the memory address of the allocation.
+ */
+void *kmalloc_eternal_aligned(const size_t size, size_t alignment);
+
+/*
+ *  @brief set kmalloc eternal end pointer
+ * 
+ *  @return the kmalloc eternal end.
+ */
+void set_kmalloc_eternal_ptr(void *pKmallocEternal);
+
+/*
+ *  @brief Get kmalloc eternal end pointer
+ * 
+ *  @return the kmalloc eternal end.
+ */
+void *get_kmalloc_eternal_ptr();
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------

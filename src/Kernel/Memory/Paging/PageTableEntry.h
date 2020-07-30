@@ -17,7 +17,7 @@ class PageTable;
 class PageTableEntry : public Bitmap<64>
 {
 public:
-    typedef BitField<PageTableEntry, 1> Present;                 ///< Is page present.
+    typedef BitField<PageTableEntry, 1> Present;        ///< Is page present.
     typedef BitField<Present, 1> Writable;              ///< Is page writable.
     typedef BitField<Writable, 1> UserAccessible;       ///< If not set only kernel can access.
     typedef BitField<UserAccessible, 1> WriteThrough;   ///< Writes through the cache i.e data both in cache and memory (no dirty data).
@@ -60,10 +60,8 @@ public:
      *  Shift the address by 12 bits to the right.
      * 
      *  @param physicalAddress the physical address.
-     * 
-     *  @return the physical address set.
      */
-    const BartOS::PhysicalAddress SetPhysicalAddress(const BartOS::PhysicalAddress &physicalAddress);
+    void SetPhysicalAddress(const BartOS::PhysicalAddress &physicalAddress);
 
     /*
      *  @brief Set the physical address in the entry

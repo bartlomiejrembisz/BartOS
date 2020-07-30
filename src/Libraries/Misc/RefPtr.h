@@ -21,16 +21,27 @@ public:
      * 
      *  @param pType the pointer to the type.
      */
-    explicit RefPtr(RefCounter<TYPE> *pType = nullptr)
+    explicit RefPtr(RefCounter<TYPE> *pType = nullptr) :
+        m_pType(pType)
     {
-        m_pType = pType;
-        m_pType->IncrementRefCount();
+        if (m_pType)
+            m_pType->IncrementRefCount();
     }
 
-    RefPtr(const RefPtr<TYPE> &rhs) :
-        m_pType(rhs.m_pType)
+    /*
+     *  @brief Copy constructor
+     *
+     *  @param rhs ref ptr to move from
+     */
+    explicit RefPtr(const RefPtr<TYPE> &rhs)
     {
-        m_pType->IncrementRefCount();
+        if (m_pType)
+            m_pType->DecrementRefCount();
+
+        m_pType = rhs.m_pType;
+
+        if (m_pType)
+            m_pType->IncrementRefCount();
     }
 
     /*
@@ -38,14 +49,25 @@ public:
      *
      *  @param rhs ref ptr to move from
      */
-    explicit RefPtr(RefPtr<TYPE> &&rhs) :
-        m_pType(std::move(rhs.m_pType))
+    explicit RefPtr(RefPtr<TYPE> &&rhs)
     {
+        if (m_pType)
+            m_pType->DecrementRefCount();
+            
+        m_pType = rhs.m_pType;
+
         rhs.m_pType = nullptr;
     }
 
+    //! Destructor
+    ~RefPtr()
+    {
+        if (m_pType)
+            m_pType->DecrementRefCount();
+    }
+
     /*
-     *  @brief Copy constructor
+     *  @brief Copy assignment operator.
      * 
      *  @param rhs ref ptr to copy from.
      * 
@@ -53,12 +75,16 @@ public:
      */
     RefPtr<TYPE> &operator=(const RefPtr<TYPE> &rhs) const
     {
+        if (m_pType)
+            m_pType->DecrementRefCount();
+
         m_pType = rhs.m_pType;
-        m_pType->IncrementRefCount;
+        if (m_pType)
+            m_pType->IncrementRefCount();
     }
 
     /*
-     *  @brief Move assignment
+     *  @brief Move assignment operator
      *
      *  @param rhs ref ptr to move from
      *
@@ -66,14 +92,11 @@ public:
      */
     RefPtr<TYPE> &operator==(RefPtr<TYPE> &&rhs) const
     {
-        m_pType == std::move(rhs.m_pType);
+        if (m_pType)
+            m_pType->DecrementRefCount();
+            
+        m_pType == rhs.m_pType;
         rhs.m_pType = nullptr;
-    }
-
-    //! Desctructor
-    ~RefPtr()
-    {
-        m_pType->DecrementRefCount();
     }
 
     /*
