@@ -122,7 +122,7 @@ void KernelAddressSpace::SynchronizeKernelAddressSpace()
         }
 
         VirtualPage &virtualPage = m_pVirtualPages[pageIndex];
-        MemoryPool::PhysicalRange physicalRange = Pmm::Get().AllocateRange(PhysicalAddress::Create(virtualAddress), PAGE_2M);
+        MemoryPool::PhysicalRange physicalRange = Pmm::Get().AllocateRange(PhysicalAddress::Create(virtualAddress), PAGE_2M / PhysicalPage::m_pageSize);
         virtualPage.Initialize(virtualAddress, *this, &p1TableEntry, std::move(physicalRange), PAGE_2M);
     }
 }

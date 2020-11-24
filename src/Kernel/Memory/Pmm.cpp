@@ -130,7 +130,7 @@ PhysicalAddress Pmm::GetEndAddress()
     if (!m_isInitialized)
         return PhysicalAddress(0);
 
-    return PhysicalAddress::Create(VirtualAddress(reinterpret_cast<intptr_t>(m_memoryPool.m_pPool + m_memoryPool.m_poolSize)));
+    return PhysicalAddress::Create(VirtualAddress(reinterpret_cast<Address_t>(m_memoryPool.m_pPool + m_memoryPool.m_poolSize)));
 }
 
 // ---------------------------------------------------------------------------------------------------------
