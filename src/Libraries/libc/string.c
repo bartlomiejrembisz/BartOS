@@ -176,11 +176,6 @@ void *memmove(void *dest, const void *src, size_t n)
 
 void *memset(void *dest, int c, size_t n)
 {
-	if (dest == 0xFFFFFFFFFFE00000)
-	{
-		volatile int i = 0;
-	}
-	
 	unsigned char *s = dest;
 	size_t k;
 

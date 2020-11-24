@@ -138,9 +138,6 @@ private:
     MemoryPool &operator=(const MemoryPool &rhs) = delete;
     MemoryPool &operator=(MemoryPool &&rhs) = delete;
 
-    //! Initialize the memory pool.
-    void Initialize();
-
     /*
      *  @brief Divide memory region into page sizes and add to pool.
      * 

@@ -20,11 +20,11 @@ KernelAddressSpace::KernelAddressSpace(MM::PageTable * const pPageTable) :
 
 VirtualPage *KernelAddressSpace::GetVirtualPage(const VirtualAddress virtualAddress)
 {
-    const intptr_t relocatedAddress = virtualAddress.PageAddress(PAGE_SIZE_2M).Get() - (uintptr_t)KERNEL_VMA;
-    if (relocatedAddress > MAX_KERNEL_SIZE)
+    const uintptr_t relocatedAddress = virtualAddress.PageAddress(PAGE_2M).Get() - (uintptr_t)KERNEL_VMA;
+    if (relocatedAddress > GetMaximumKernelAddressSpaceSize())
         ASSERT(false);
 
-    const size_t pageIndex = static_cast<size_t>(relocatedAddress / PAGE_SIZE_2M);
+    const size_t pageIndex = static_cast<size_t>(relocatedAddress / PAGE_2M);
     return &m_pVirtualPages[pageIndex];
 }
 
@@ -32,7 +32,7 @@ VirtualPage *KernelAddressSpace::GetVirtualPage(const VirtualAddress virtualAddr
 
 void KernelAddressSpace::Initialize()
 {
-    m_nVirtualPages = MAX_KERNEL_PAGES;
+    m_nVirtualPages = Max(static_cast<size_t>(MINIMUM_KERNEL_PAGES), (Pmm::Get().GetMemoryStats().m_totalMemory / KERNEL_MEMORY_FACTOR) / KERNEL_PAGE_SIZE);
     m_pVirtualPages = static_cast<VirtualPage *>(kmalloc_eternal(m_nVirtualPages));
 
     SynchronizeKernelAddressSpace();
@@ -44,7 +44,7 @@ void KernelAddressSpace::SynchronizeKernelAddressSpace()
 {
     for (size_t pageIndex = 0; pageIndex < m_nVirtualPages; ++pageIndex)
     {
-        const VirtualAddress virtualAddress((pageIndex * PAGE_SIZE_2M) + (uintptr_t)KERNEL_VMA);
+        const VirtualAddress virtualAddress((pageIndex * PAGE_2M) + (uintptr_t)KERNEL_VMA);
 
         // Stop allocating pages once the entire kernel space is allocated.
         if (virtualAddress >= get_kmalloc_eternal_ptr())

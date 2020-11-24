@@ -38,15 +38,15 @@ void *kmalloc_eternal(const size_t size)
     pEternalMallocPointer = reinterpret_cast<uint8_t *>(ALIGN_TO_NEXT_BOUNDARY((uintptr_t)pEternalMallocPointer, ALIGNMENT_BYTES));
 
     //! Make sure every page for the allocation is mapped.
-    for (uint8_t *pAllocation = pAlloc; pAllocation < (pAlloc + size); pAllocation += PAGE_SIZE_2M)
+    for (uint8_t *pAllocation = pAlloc; pAllocation < (pAlloc + size); pAllocation += PAGE_2M)
     {
         uint8_t *pMappingMemory = pAllocation;
         //! HACK: Overflow guard.
         if (pAllocation < pAlloc)
             break;
 
-        MM::Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pMappingMemory)).PageAddress(PAGE_SIZE_2M),
-                                    VirtualAddress(pMappingMemory).PageAddress(PAGE_SIZE_2M),
+        MM::Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pMappingMemory)).PageAddress(PAGE_2M),
+                                    VirtualAddress(pMappingMemory).PageAddress(PAGE_2M),
                                     static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
     }
 

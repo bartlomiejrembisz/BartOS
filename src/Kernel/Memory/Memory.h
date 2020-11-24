@@ -13,8 +13,9 @@ namespace BartOS
 
 #define PAGE_SIZE (4 * KiB)
 #define PAGE_SIZE_2M (2 * MiB)
+#define PAGE_SIZE_1G (1 * GiB)
 
-#define MAX_KERNEL_SIZE (1 * GiB)
+#define MIN_KERNEL_SIZE (1 * GiB)
 
 //! Paging typedefs.
 using TableEntryIndex = uint16_t;
@@ -23,9 +24,9 @@ using PageTableIndex = uint8_t;
 //! Page size enums.
 enum PageSize
 {
-    PAGE_4K,
-    PAGE_2M,
-    PAGE_1G,
+    PAGE_4K = PAGE_SIZE,
+    PAGE_2M = PAGE_SIZE_2M,
+    PAGE_1G = PAGE_SIZE_1G,
     INVALID_PAGE_SIZE
 };
 

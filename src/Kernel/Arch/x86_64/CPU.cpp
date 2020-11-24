@@ -139,14 +139,18 @@ void SetCR4(const CR4 cr4)
 
 uint64_t GetMSR(const uint32_t msrId)
 {
-
+    (void) msrId;
+    ASSERT(false);
+    return 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void SetEFER(const uint32_t msrId, const uint64_t value)
 {
-
+    (void) msrId;
+    (void) value;
+    ASSERT(false);
 }
 
 // ---------------------------------------------------------------------------------------------------------

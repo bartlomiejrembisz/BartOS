@@ -56,7 +56,6 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
         }
     }
 
-    m_memoryPool.Initialize();
     set_kmalloc_eternal_ptr(m_memoryPool.m_pPool + m_memoryPool.m_poolSize + 1);
 
     kprintf("[PMM] PMM initialized. Pool start=%p, Page count=%u, Page handle size=%u\n", m_memoryPool.m_pPool, m_memoryPool.m_poolSize,

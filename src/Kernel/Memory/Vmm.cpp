@@ -183,7 +183,7 @@ StatusCode Vmm::MapPageImpl(PageTable * const pP4Table, const PhysicalAddress &p
 
     if ((pageFlags & PageFlags::HUGE_PAGE) && (PAGE_2M == pageSize))
     {
-        ASSERT(ALIGN(physicalAddress.Get(), PAGE_SIZE_2M) == physicalAddress.Get());
+        ASSERT(ALIGN(physicalAddress.Get(), PAGE_2M) == physicalAddress.Get());
         //! 52 bit page size aligned address.
         p2TableEntry.SetPhysicalAddress(physicalAddress);
 

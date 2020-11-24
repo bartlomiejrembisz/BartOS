@@ -21,12 +21,6 @@ MemoryPool::MemoryPool() :
 
 // ---------------------------------------------------------------------------------------------------------
 
-void MemoryPool::Initialize()
-{
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
 void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
 {
     //! Don't process addresses below the kernel physical start since they're memory mapped to something else.
@@ -40,8 +34,8 @@ void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
         m_pPool = pPhysicalPage;
 
         //! Make sure the page for the PhysicalPage object is mapped.
-        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage)).PageAddress(PAGE_SIZE_2M),
-                                      VirtualAddress(pPhysicalPage).PageAddress(PAGE_SIZE_2M),
+        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage)).PageAddress(PAGE_2M),
+                                      VirtualAddress(pPhysicalPage).PageAddress(PAGE_2M),
                                       static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
     }
     else
@@ -54,8 +48,8 @@ void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
     for (; pagePhysAddr < regionEnd; pagePhysAddr += PAGE_SIZE)
     {
         //! Check whether the page for the next PhysicalPage object is mapped.
-        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage + 1)).PageAddress(PAGE_SIZE_2M),
-                                      VirtualAddress(pPhysicalPage + 1).PageAddress(PAGE_SIZE_2M),
+        Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage + 1)).PageAddress(PAGE_2M),
+                                      VirtualAddress(pPhysicalPage + 1).PageAddress(PAGE_2M),
                                       static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
 
         // Placement new to reinitialize.

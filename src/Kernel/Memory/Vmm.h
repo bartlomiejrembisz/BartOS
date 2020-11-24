@@ -103,7 +103,6 @@ private:
     static const uint64_t TEMP_ENTRY_ADDR_BASE = 0xFFFFFFFFFFE00000;
 
     static PageTable * const m_pTempMapTable;  ///< Level 1 page table used to map temporary pages. Always mapped as last 2MiB in kernel address space.
-     */
 
     /*
      *  @brief Map an address 
