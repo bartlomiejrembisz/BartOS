@@ -9,6 +9,7 @@ namespace BartOS
 template <typename ADDRESS>
 class Address {
 public:
+
     //! Constructor
     Address();
 
@@ -17,28 +18,28 @@ public:
      * 
      *  @param address the address.
      */
-    explicit Address(const uintptr_t address);
+    explicit Address(const Address_t address);
 
     /*
      *  @brief Offset the address
      * 
      *  @param offset the offset of the address.
      */
-    ADDRESS Offset(const uintptr_t offset) const;
+    ADDRESS Offset(const Address_t offset) const;
 
     /*
-     *  @brief Get the address as uintptr_t
+     *  @brief Get the address as Address_t
      * 
-     *  @return the address as uintptr_t.
+     *  @return the address as Address_t.
      */
-    uintptr_t Get() const;
+    Address_t Get() const;
 
     /*
-     *  @brief Set the address as uintptr_t
+     *  @brief Set the address as Address_t
      * 
-     *  @param address the address as uintptr_t.
+     *  @param address the address as Address_t.
      */
-    void Set(const uintptr_t address);
+    void Set(const Address_t address);
 
     /*
      *  @brief Get the page offset for the address.
@@ -47,8 +48,8 @@ public:
      */
     ADDRESS PageAddress(const size_t pageSize) const;
 
-    //! operator uintptr_t for conversion.
-    operator uintptr_t() const;
+    //! operator Address_t for conversion.
+    operator Address_t() const;
 
     //! operator bool for bool conversion
     operator bool() const;
@@ -62,14 +63,14 @@ public:
     operator POINTER*() const;
 
     //! Arithmetic operators.
-    ADDRESS operator+(const uintptr_t offset);
+    ADDRESS operator+(const Address_t offset);
     ADDRESS operator+(const Address<ADDRESS> &offset);
-    ADDRESS &operator+=(const uintptr_t offset);
+    ADDRESS &operator+=(const Address_t offset);
     ADDRESS &operator+=(const Address<ADDRESS> &offset);
 
-    ADDRESS operator-(const uintptr_t offset);
+    ADDRESS operator-(const Address_t offset);
     ADDRESS operator-(const Address<ADDRESS> &offset);
-    ADDRESS &operator-=(const uintptr_t offset);
+    ADDRESS &operator-=(const Address_t offset);
     ADDRESS &operator-=(const Address<ADDRESS> &offset);
 
     /*
@@ -77,8 +78,8 @@ public:
      * 
      *  @param mask the mask
      */
-    ADDRESS operator&(const uintptr_t mask);
-    ADDRESS &operator&=(const uintptr_t mask);
+    ADDRESS operator&(const Address_t mask);
+    ADDRESS &operator&=(const Address_t mask);
 
     //! Logical operators.
     bool operator==(const Address<ADDRESS> &rhs) const;
@@ -89,7 +90,7 @@ public:
     bool operator<=(const Address<ADDRESS> &rhs) const;
 
 protected:
-    uintptr_t m_address;
+    Address_t m_address;
 };
 
 // ---------------------------------------------------------------------------------------------------------

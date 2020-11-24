@@ -49,7 +49,7 @@ StatusCode Pmm::Initialize(const multiboot_tag_mmap *pMmapTag)
         if (MULTIBOOT_MEMORY_AVAILABLE == pMmapEntry->type)
         {
             MemoryPool::MemoryRegion memoryRegion;
-            memoryRegion.m_addr = PhysicalAddress(static_cast<uintptr_t>(pMmapEntry->addr));
+            memoryRegion.m_addr = PhysicalAddress(static_cast<Address_t>(pMmapEntry->addr));
             memoryRegion.m_size = pMmapEntry->len;
 
             m_memoryPool.AddMemoryRegion(memoryRegion);

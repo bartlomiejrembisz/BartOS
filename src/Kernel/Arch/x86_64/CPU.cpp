@@ -193,7 +193,7 @@ void Hlt()
 
 // ---------------------------------------------------------------------------------------------------------
 
-void Invlpg(const uintptr_t virtualAddress)
+void Invlpg(const Address_t virtualAddress)
 {
     __asm__ __volatile__("invlpg (%%eax)" : : "a" (virtualAddress));
 }

@@ -13,7 +13,7 @@ VirtualAddress::VirtualAddress()
 
 // ---------------------------------------------------------------------------------------------------------
 
-VirtualAddress::VirtualAddress(const uintptr_t address) : 
+VirtualAddress::VirtualAddress(const Address_t address) : 
     Address<VirtualAddress>(address)
 {
 }
@@ -102,7 +102,7 @@ VirtualAddress::Layout::PageOffset::ValueType VirtualAddress::GetPageOffset() co
 
 VirtualAddress VirtualAddress::Create(const PhysicalAddress &physicalAddress)
 {
-    return VirtualAddress(physicalAddress.Get() + reinterpret_cast<uintptr_t>(KERNEL_VMA));
+    return VirtualAddress(physicalAddress.Get() + reinterpret_cast<Address_t>(KERNEL_VMA));
 }
 
 

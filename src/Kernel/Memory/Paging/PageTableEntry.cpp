@@ -184,7 +184,7 @@ const BartOS::PhysicalAddress PageTableEntry::GetPhysicalAddress() const
 
 PageTable *PageTableEntry::PageTablePtr()
 {
-    const uintptr_t address = (Get<PhysicalAddress>() << 12);
+    const Address_t address = (Get<PhysicalAddress>() << 12);
     return reinterpret_cast<PageTable *>(ALIGN(address, PAGE_SIZE));
 }
 
@@ -192,7 +192,7 @@ PageTable *PageTableEntry::PageTablePtr()
 
 const PageTable *PageTableEntry::PageTablePtr() const
 {
-    const uintptr_t address = (Get<PhysicalAddress>() << 12);
+    const Address_t address = (Get<PhysicalAddress>() << 12);
     return reinterpret_cast<PageTable *>(ALIGN(address, PAGE_SIZE));
 }
 
@@ -200,7 +200,7 @@ const PageTable *PageTableEntry::PageTablePtr() const
 
 uint8_t *PageTableEntry::PagePtr()
 {
-    const uintptr_t address = (Get<PhysicalAddress>() << 12);
+    const Address_t address = (Get<PhysicalAddress>() << 12);
     return reinterpret_cast<uint8_t *>(ALIGN(address, PAGE_SIZE));
 }
 
@@ -208,7 +208,7 @@ uint8_t *PageTableEntry::PagePtr()
 
 const uint8_t *PageTableEntry::PagePtr() const
 {
-    const uintptr_t address = (Get<PhysicalAddress>() << 12);
+    const Address_t address = (Get<PhysicalAddress>() << 12);
     return reinterpret_cast<uint8_t *>(ALIGN(address, PAGE_SIZE));
 }
 

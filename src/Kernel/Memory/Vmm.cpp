@@ -133,7 +133,7 @@ PhysicalAddress Vmm::GetEndAddress()
     if (!m_isInitialized)
         return PhysicalAddress(0);
 
-    return PhysicalAddress::Create(VirtualAddress(reinterpret_cast<intptr_t>(m_kernelAddressSpace.m_pVirtualPages + m_kernelAddressSpace.m_nVirtualPages)));
+    return PhysicalAddress::Create(VirtualAddress(reinterpret_cast<Address_t>(m_kernelAddressSpace.m_pVirtualPages + m_kernelAddressSpace.m_nVirtualPages)));
 }
 
 // ---------------------------------------------------------------------------------------------------------

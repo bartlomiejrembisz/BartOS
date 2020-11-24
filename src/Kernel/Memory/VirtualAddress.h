@@ -13,7 +13,7 @@ class PhysicalAddress;
 class [[gnu::packed]] VirtualAddress : public Address<VirtualAddress>
 {
 public:
-    class Layout : public Bitmap<TypeSizeTraits<uintptr_t>::bitSize>
+    class Layout : public Bitmap<TypeSizeTraits<Address_t>::bitSize>
     {
     public:
         typedef BitField<Layout, 12> PageOffset;
@@ -31,7 +31,7 @@ public:
      * 
      *  @param address the address.
      */
-    explicit VirtualAddress(const uintptr_t address);
+    explicit VirtualAddress(const Address_t address);
 
     /*
      *  @brief Constructor
@@ -68,7 +68,7 @@ public:
 
 template <typename T>
 VirtualAddress::VirtualAddress(const T *pObject) :
-    Address(reinterpret_cast<uintptr_t >(pObject))
+    Address(reinterpret_cast<Address_t >(pObject))
 {
 }
 

@@ -13,7 +13,7 @@ PhysicalAddress::PhysicalAddress()
 
 // ---------------------------------------------------------------------------------------------------------
 
-PhysicalAddress::PhysicalAddress(const uintptr_t address) : 
+PhysicalAddress::PhysicalAddress(const Address_t address) : 
     Address<PhysicalAddress>(address)
 {
 }
@@ -22,7 +22,7 @@ PhysicalAddress::PhysicalAddress(const uintptr_t address) :
 
 PhysicalAddress PhysicalAddress::Create(const VirtualAddress &virtualAddress)
 {
-    return PhysicalAddress(virtualAddress.Get() - reinterpret_cast<uintptr_t>(KERNEL_VMA));
+    return PhysicalAddress(virtualAddress.Get() - reinterpret_cast<Address_t>(KERNEL_VMA));
 }
 
 } // namespace BartOS

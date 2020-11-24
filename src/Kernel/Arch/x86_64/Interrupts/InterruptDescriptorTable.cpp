@@ -88,9 +88,9 @@ void Gate::Set(void(*isr_handler)(), const uint8_t interruptStackTable)
     Word2 word2;
 
     //! Setup function pointer.
-    word1.Set<Word1::LowerFunPtr>(((uintptr_t) isr_handler) & 0xFFFF);
-    word1.Set<Word1::MiddleFunPtr>(((uintptr_t) isr_handler) >>  Word1::LowerFunPtr::GetLength());
-    const uint32_t remainingFunPtr = ((uintptr_t) isr_handler) >> (Word1::LowerFunPtr::GetLength() + Word1::MiddleFunPtr::GetLength());
+    word1.Set<Word1::LowerFunPtr>(((Address_t) isr_handler) & 0xFFFF);
+    word1.Set<Word1::MiddleFunPtr>(((Address_t) isr_handler) >>  Word1::LowerFunPtr::GetLength());
+    const uint32_t remainingFunPtr = ((Address_t) isr_handler) >> (Word1::LowerFunPtr::GetLength() + Word1::MiddleFunPtr::GetLength());
     word2.Set<Word2::RemainingFunPtr>(remainingFunPtr & 0xFFFFFFFF);
 
     //! Setup GDT selctor and options.
@@ -105,7 +105,7 @@ void Gate::Set(void(*isr_handler)(), const uint8_t interruptStackTable)
 // ---------------------------------------------------------------------------------------------------------
 
 InterruptDescriptorTable::InterruptDescriptorTable() :
-    m_descriptor { .m_size = sizeof(m_gates), .m_address = PhysicalAddress((uintptr_t) &m_gates) }
+    m_descriptor { .m_size = sizeof(m_gates), .m_address = PhysicalAddress((Address_t) &m_gates) }
 {
 }
 

@@ -260,7 +260,7 @@ void Sti();
 void Hlt();
 
 //! Invalidate the page in the TLB;
-void Invlpg(const uintptr_t virtualAddress);
+void Invlpg(const Address_t virtualAddress);
 
 //! Invalidate the page in the TLB;
 void Invlpg(const VirtualAddress virtualAddress);

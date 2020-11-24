@@ -11,6 +11,8 @@
 
 #include "frg/macros.hpp"
 
+#include "CoreDefs.h"
+
 #define ASSERT(cond) FRG_ASSERT(cond)
 
 #endif //! BARTOS_H

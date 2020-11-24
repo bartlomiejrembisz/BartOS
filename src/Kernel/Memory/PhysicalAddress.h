@@ -19,7 +19,7 @@ public:
      * 
      *  @param address the address.
      */
-    explicit PhysicalAddress(const uintptr_t address);
+    explicit PhysicalAddress(const Address_t address);
 
     /*
      *  @brief Create PhysicalAddress from VirtualAddress.

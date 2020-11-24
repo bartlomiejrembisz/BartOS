@@ -17,7 +17,7 @@ Address<ADDRESS>::Address() :
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-Address<ADDRESS>::Address(const uintptr_t address) :
+Address<ADDRESS>::Address(const Address_t address) :
     m_address(address)
 {
 }
@@ -25,7 +25,7 @@ Address<ADDRESS>::Address(const uintptr_t address) :
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::Offset(uintptr_t offset) const
+ADDRESS Address<ADDRESS>::Offset(Address_t offset) const
 {
     return ADDRESS(m_address + offset);
 }
@@ -33,7 +33,7 @@ ADDRESS Address<ADDRESS>::Offset(uintptr_t offset) const
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-uintptr_t Address<ADDRESS>::Get() const
+Address_t Address<ADDRESS>::Get() const
 {
     return m_address;
 }
@@ -41,7 +41,7 @@ uintptr_t Address<ADDRESS>::Get() const
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-void Address<ADDRESS>::Set(const uintptr_t address)
+void Address<ADDRESS>::Set(const Address_t address)
 {
     m_address = address;
 }
@@ -57,7 +57,7 @@ ADDRESS Address<ADDRESS>::PageAddress(const size_t pageSize) const
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-Address<ADDRESS>::operator uintptr_t() const
+Address<ADDRESS>::operator Address_t() const
 {
     return m_address;
 }
@@ -73,7 +73,7 @@ Address<ADDRESS>::operator bool() const
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator+(const uintptr_t offset)
+ADDRESS Address<ADDRESS>::operator+(const Address_t offset)
 {
     return ADDRESS(m_address + offset);
 }
@@ -89,7 +89,7 @@ ADDRESS Address<ADDRESS>::operator+(const Address<ADDRESS> &offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS &Address<ADDRESS>::operator+=(const uintptr_t offset)
+ADDRESS &Address<ADDRESS>::operator+=(const Address_t offset)
 {
     m_address += offset;
     return static_cast<ADDRESS &>(*this);
@@ -107,7 +107,7 @@ ADDRESS &Address<ADDRESS>::operator+=(const Address<ADDRESS> &offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator-(const uintptr_t offset)
+ADDRESS Address<ADDRESS>::operator-(const Address_t offset)
 {
     return ADDRESS(m_address - offset);
 }
@@ -123,7 +123,7 @@ ADDRESS Address<ADDRESS>::operator-(const Address<ADDRESS> &offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS &Address<ADDRESS>::operator-=(const uintptr_t offset)
+ADDRESS &Address<ADDRESS>::operator-=(const Address_t offset)
 {
     m_address -= offset;
     return static_cast<ADDRESS &>(*this);
@@ -141,7 +141,7 @@ ADDRESS &Address<ADDRESS>::operator-=(const Address<ADDRESS> &offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator&(const uintptr_t mask)
+ADDRESS Address<ADDRESS>::operator&(const Address_t mask)
 {
     return ADDRESS(m_address & mask);
 }
@@ -149,7 +149,7 @@ ADDRESS Address<ADDRESS>::operator&(const uintptr_t mask)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS &Address<ADDRESS>::operator&=(const uintptr_t mask)
+ADDRESS &Address<ADDRESS>::operator&=(const Address_t mask)
 {
     *this & mask;
     return static_cast<ADDRESS &>(*this);

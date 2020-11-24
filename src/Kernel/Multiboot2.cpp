@@ -14,10 +14,10 @@ const TAG *GetMultiboot2Tag(const multiboot_uint32_t type)
     if (!g_pBootInfo)
         return nullptr;
 
-    const uintptr_t tagStartAddr = reinterpret_cast<uintptr_t>(g_pBootInfo) + sizeof(boot_info);
-    const uintptr_t tagEndAddr = tagStartAddr + g_pBootInfo->total_size;
+    const Address_t tagStartAddr = reinterpret_cast<Address_t>(g_pBootInfo) + sizeof(boot_info);
+    const Address_t tagEndAddr = tagStartAddr + g_pBootInfo->total_size;
 
-    uintptr_t tagAddr = tagStartAddr;
+    Address_t tagAddr = tagStartAddr;
     while (tagAddr < tagEndAddr)
     {
         const multiboot_tag *pMultibootTag = reinterpret_cast<const multiboot_tag *>(tagAddr);

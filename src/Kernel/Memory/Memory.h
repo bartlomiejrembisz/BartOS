@@ -54,11 +54,11 @@ enum PageTableLevel
 };
 
 //! Kernel symbols exposed by the linker.
-extern "C" uintptr_t KERNEL_VMA[];
-extern "C" uintptr_t __kernel_virtual_start[];
-extern "C" uintptr_t __kernel_physical_start[];
-extern "C" uintptr_t __kernel_virtual_end[];
-extern "C" uintptr_t __kernel_physical_end[];
+extern "C" Address_t KERNEL_VMA[];
+extern "C" Address_t __kernel_virtual_start[];
+extern "C" Address_t __kernel_physical_start[];
+extern "C" Address_t __kernel_virtual_end[];
+extern "C" Address_t __kernel_physical_end[];
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------

@@ -48,7 +48,7 @@ static const FlagBit LONG        = 0b0010;
 // ---------------------------------------------------------------------------------------------------------
 
 GlobalDescriptorTable::GlobalDescriptorTable() : 
-    m_descriptor { .m_size = (sizeof(Entry) * GDT_ENTRY_COUNT), .m_address = PhysicalAddress((uintptr_t) &m_entries[0])}
+    m_descriptor { .m_size = (sizeof(Entry) * GDT_ENTRY_COUNT), .m_address = PhysicalAddress((Address_t) &m_entries[0])}
 {
 }
 
