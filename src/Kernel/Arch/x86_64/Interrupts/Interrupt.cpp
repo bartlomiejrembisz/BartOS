@@ -46,7 +46,6 @@ StatusCode InterruptHandler::Handle(const InterruptContext &interruptContext) co
 
 // ---------------------------------------------------------------------------------------------------------
 
-
 void InterruptHandler::OnRegister() const
 {
 }
@@ -79,22 +78,7 @@ void RegisterInterrupt(const InterruptHandler *pInterruptHandler)
 
 extern "C" void HandleInterrupt(InterruptContext interruptContext)
 {
-    if (Isrs::IsException(interruptContext.m_interruptCode))
-    {
-        kprintf("Interrupt No: %u - %s\nInstruction address = %p\n", interruptContext.m_interruptCode,
-                Isrs::GetIsrMnemonic(interruptContext.m_interruptCode), interruptContext.m_rip);
-
-        if (interruptContext.m_interruptCode == Isrs::EXCEPTION_PAGE_FAULT)
-        {
-            kprintf("Page Fault Address: %p\n", CPU::GetCR2());
-        }
-
-        if (Isrs::EXCEPTION_INVALID_OPCODE == interruptContext.m_interruptCode)
-            CPU::Hlt();
-    }
-    else // IRQ
-    {
-        const InterruptHandler *pInterruptHandler = g_pInterruptHandlers[Isrs::GetIrqCode(interruptContext.m_interruptCode)];
+        const InterruptHandler *pInterruptHandler = g_pInterruptHandlers[interruptContext.m_interruptCode];
         if (pInterruptHandler)
         {
             const StatusCode statusCode = pInterruptHandler->Handle(interruptContext);
@@ -106,11 +90,13 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
             //kprintf("Undefined IRQ handler %u\n", Isrs::GetIrqCode(interruptContext.interrupt_num));
         }
 
-        //! Send an EOI ack to the PICs.
-        if (interruptContext.m_interruptCode >= 40)
-            out_byte(0xA0, 0x20); // slave
-        out_byte(0x20, 0x20);   // master
-    }
+        if (!Isrs::IsException(interruptContext.m_errorCode))
+        {
+            //! Send an EOI ack to the PICs.
+            if (interruptContext.m_interruptCode >= 40)
+                out_byte(0xA0, 0x20); // slave
+            out_byte(0x20, 0x20);   // master
+        }
 }
 
 } // namespace Interrupt

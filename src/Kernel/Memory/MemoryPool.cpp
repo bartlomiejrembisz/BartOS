@@ -36,7 +36,7 @@ void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
         //! Make sure the page for the PhysicalPage object is mapped.
         Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage)).PageAddress(PAGE_2M),
                                       VirtualAddress(pPhysicalPage).PageAddress(PAGE_2M),
-                                      static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
+                                      (PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
     }
     else
     {
@@ -50,7 +50,7 @@ void MemoryPool::AddMemoryRegion(const MemoryRegion &memoryRegion)
         //! Check whether the page for the next PhysicalPage object is mapped.
         Vmm::Get().EnsureKernelMapped(PhysicalAddress::Create(VirtualAddress(pPhysicalPage + 1)).PageAddress(PAGE_2M),
                                       VirtualAddress(pPhysicalPage + 1).PageAddress(PAGE_2M),
-                                      static_cast<PageFlags>(PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
+                                      (PRESENT | WRITABLE | HUGE_PAGE), PAGE_2M);
 
         // Placement new to reinitialize.
         new (pPhysicalPage) PhysicalPage(pagePhysAddr);

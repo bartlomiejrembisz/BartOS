@@ -6,16 +6,6 @@
 #include <limits.h>
 #include <utility>
 
-//! New and delete can't be in a namespace.
-void *operator new(size_t size);
-void *operator new[](size_t size);
-void operator delete(void *ptr);
-void operator delete[](void *ptr);
-void operator delete(void *ptr, size_t size);
-
-// ---------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------
-
 namespace BartOS
 {
 
@@ -42,6 +32,17 @@ typedef uintptr_t Address_t;    ///< The Address_t type definition.
 // ---------------------------------------------------------------------------------------------------------
 
 // Templates
+
+//! Bit operators for enums.
+template<class T> inline T operator~ (T a) { return (T)~(int)a; }
+template<class T> inline T operator| (T a, T b) { return (T)((int)a | (int)b); }
+template<class T> inline T operator& (T a, T b) { return (T)((int)a & (int)b); }
+template<class T> inline T operator^ (T a, T b) { return (T)((int)a ^ (int)b); }
+template<class T> inline T& operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); }
+template<class T> inline T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); }
+template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }
+
+// ---------------------------------------------------------------------------------------------------------
 
 //! Conditional template
 template<bool B, class T, class F>
@@ -213,6 +214,16 @@ class StaticPower<BASE, 0>
 {
 public:
     static constexpr size_t value = 1;
+};
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+template<size_t VALUE>
+class IsPowerOfTwo
+{
+public:
+    static constexpr bool value = (VALUE && ((VALUE & (VALUE - 1)) == 0));
 };
 
 // ---------------------------------------------------------------------------------------------------------

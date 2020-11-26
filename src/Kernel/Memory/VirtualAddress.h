@@ -47,6 +47,9 @@ public:
     Layout::Level2::ValueType SetLevel2(const Layout::Level2::ValueType level2);
     Layout::Level1::ValueType SetLevel1(const Layout::Level1::ValueType level1);
     Layout::PageOffset::ValueType SetPageOffset(const Layout::PageOffset::ValueType pageOffset);
+    
+    template<typename T>
+    void SetLevel(const typename T::ValueType value);
 
     //! Getters
     Layout::Level4::ValueType GetLevel4() const;
@@ -54,6 +57,9 @@ public:
     Layout::Level2::ValueType GetLevel2() const;
     Layout::Level1::ValueType GetLevel1() const;
     Layout::PageOffset::ValueType GetPageOffset() const;
+
+    template<typename T>
+    typename T::ValueType GetLevel();
 
     /*
      *  @brief Create VirtualAddress from PhysicalAddress.
@@ -70,6 +76,22 @@ template <typename T>
 VirtualAddress::VirtualAddress(const T *pObject) :
     Address(reinterpret_cast<Address_t >(pObject))
 {
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+template<typename T>
+void VirtualAddress::SetLevel(const typename T::ValueType value)
+{
+    T::Set(m_address, value);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+template<typename T>
+typename T::ValueType VirtualAddress::GetLevel()
+{
+    return static_cast<typename T::ValueType>(T::Get(m_address));
 }
 
 } // namespace BartOS

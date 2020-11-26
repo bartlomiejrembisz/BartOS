@@ -168,6 +168,20 @@ bool PageTableEntry::IsNoExecute() const
 
 // ---------------------------------------------------------------------------------------------------------
 
+void PageTableEntry::SetPageFlags(const PageFlags pageFlags)
+{
+    SetPresent(pageFlags & PRESENT);
+    SetWritable(pageFlags & WRITABLE);
+    SetUserAccessible(pageFlags & USER_ACCESSIBLE);
+    SetWriteThrough(pageFlags & WRITE_THROUGH);
+    SetCacheDisabled(pageFlags & DISABLE_CACHE);
+    SetHugePage(pageFlags & HUGE_PAGE);
+    SetGlobal(pageFlags & GLOBAL);
+    SetNoExecute(pageFlags & NO_EXECUTE);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
 void PageTableEntry::SetPhysicalAddress(const BartOS::PhysicalAddress &physicalAddress)
 {
     Set<PageTableEntry::PhysicalAddress>(physicalAddress.Get() >> 12);

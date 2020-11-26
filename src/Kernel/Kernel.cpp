@@ -80,8 +80,6 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
         x86_64::CPU::Hlt();
     }
 
-    //kprintf("\nKernel P4 Table: %p\n", MM::Vmm::Get().m_pKernelP4Table);
-
     MM::Vmm::Get().Initialize();
 
     x86_64::CPU::Sti();

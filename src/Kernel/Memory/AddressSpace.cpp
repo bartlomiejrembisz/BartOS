@@ -1,5 +1,8 @@
 #include "AddressSpace.h"
 
+#include "Pmm.h"
+#include "Vmm.h"
+
 namespace BartOS
 {
 
@@ -14,7 +17,8 @@ AddressSpace::AddressSpace() :
 // ---------------------------------------------------------------------------------------------------------
 
 AddressSpace::AddressSpace(MM::PageTable * const pPageTable) :
-    m_pPageTable(pPageTable)
+    m_pPageTable(pPageTable),
+    m_addressBreak(0)
 {
 }
 

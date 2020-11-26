@@ -17,19 +17,19 @@ class PageTable;
 class PageTableEntry : public Bitmap<64>
 {
 public:
-    typedef BitField<PageTableEntry, 1> Present;        ///< Is page present.
-    typedef BitField<Present, 1> Writable;              ///< Is page writable.
-    typedef BitField<Writable, 1> UserAccessible;       ///< If not set only kernel can access.
-    typedef BitField<UserAccessible, 1> WriteThrough;   ///< Writes through the cache i.e data both in cache and memory (no dirty data).
-    typedef BitField<WriteThrough, 1> CacheDisabled;    ///< Disable caching the page.
-    typedef BitField<CacheDisabled, 1> Accessed;        ///< Set by the cpu, ignore.
-    typedef BitField<Accessed, 1> Dirty;                ///< Set by the cpu, ignore.
-    typedef BitField<Dirty, 1> HugePage;                ///< Must be 0 in P1 and P4, creates a 1GiB page in P3, creates a 2MiB page in P2.
-    typedef BitField<HugePage, 1> Global;               ///< Address space switch doesn't flush this page from the TLB. PGE in CR4 must be set.
-    typedef BitField<Global, 3> Available;              ///< Can be used freely.
-    typedef BitField<Available, 40> PhysicalAddress;    ///< 52 bit physical address (page aligned, 4K, 2M or 1G)
-    typedef BitField<PhysicalAddress, 11> Available2;   ///< Can be used freely.
-    typedef BitField<Available2, 1> NoExecute;          ///< Forbid executing code on this page (NXE bit in the EFER register must be set).
+    typedef BitField<PageTableEntry, 1>     Present;            ///< Is page present.
+    typedef BitField<Present, 1>            Writable;           ///< Is page writable.
+    typedef BitField<Writable, 1>           UserAccessible;     ///< If not set only kernel can access.
+    typedef BitField<UserAccessible, 1>     WriteThrough;       ///< Writes through the cache i.e data both in cache and memory (no dirty data).
+    typedef BitField<WriteThrough, 1>       CacheDisabled;      ///< Disable caching the page.
+    typedef BitField<CacheDisabled, 1>      Accessed;           ///< Set by the cpu, ignore.
+    typedef BitField<Accessed, 1>           Dirty;              ///< Set by the cpu, ignore.
+    typedef BitField<Dirty, 1>              HugePage;           ///< Must be 0 in P1 and P4, creates a 1GiB page in P3, creates a 2MiB page in P2.
+    typedef BitField<HugePage, 1>           Global;             ///< Address space switch doesn't flush this page from the TLB. PGE in CR4 must be set.
+    typedef BitField<Global, 3>             Available;          ///< Can be used freely.
+    typedef BitField<Available, 40>         PhysicalAddress;    ///< 52 bit physical address (page aligned, 4K, 2M or 1G)
+    typedef BitField<PhysicalAddress, 11>   Available2;         ///< Can be used freely.
+    typedef BitField<Available2, 1>         NoExecute;          ///< Forbid executing code on this page (NXE bit in the EFER register must be set).
 
     //! Setters
     bool SetPresent(const bool isPresent);
@@ -54,6 +54,13 @@ public:
     Available::ValueType GetAvailable1() const;
     Available2::ValueType GetAvailable2() const;
     bool IsNoExecute() const;
+
+    /*
+     *  @brief Set the page flags.
+     * 
+     *  @param pageFlags the page flags.
+     */
+    void SetPageFlags(const PageFlags pageFlags);
 
     /*
      *  @brief Set the physical address in the entry

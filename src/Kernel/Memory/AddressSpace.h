@@ -6,7 +6,7 @@
 
 #include "Kernel/Memory/Paging/PageTable.h"
 
-#include "VirtualPage.h"
+#include "VMArea.h"
 
 namespace BartOS
 {
@@ -44,18 +44,36 @@ public:
     virtual ~AddressSpace();
 
     /*
-     *  @brief Retrieve a Virtual Page object.
+     *  @brief Allocate memory for this address space.
      * 
-     *  @param virtualAddress the virtual address of the page.
+     *  @param  nBytes ammount to allocate.
+     *  @param  pageSize the page size.
+     *  @param  pageFlags the page flags
      */
-    virtual VirtualPage *GetVirtualPage(const VirtualAddress virtualAddress) = 0;
+    virtual void *Allocate(size_t nBytes, const PageSize pageSize, const PageFlags pageFlags = NO_FLAGS) = 0;
+
+    /*
+     *  @brief Get the address space break.
+     * 
+     *  @return address space break.
+     */
+    Address_t GetAddressSpaceBreak();
 
 protected:
-    MM::PageTable *m_pPageTable;       ///< Pointer to the P4 Page Table object.
 
-    friend class VirtualPage;
+    MM::PageTable   *m_pPageTable;       ///< Pointer to the P4 Page Table object.
+    Address_t       m_addressBreak;     ///< Where does the address break.
+
+    friend class VMArea;
     friend class MM::Vmm;
 };
+
+// ---------------------------------------------------------------------------------------------------------
+
+inline Address_t AddressSpace::GetAddressSpaceBreak()
+{
+    return m_addressBreak;
+}
 
 } // namespace MM
 

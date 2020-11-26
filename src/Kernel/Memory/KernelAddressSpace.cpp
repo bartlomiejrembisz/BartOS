@@ -5,11 +5,87 @@
 
 #include "Libraries/libc/string.h"
 
+#include <new>
+
 namespace BartOS
 {
 
 namespace MM
 {
+
+const VirtualAddress KernelAddressSpace::KERNEL_BEGIN_ADDRESS((Address_t) __kernel_virtual_start);
+
+// ---------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+namespace
+{
+
+struct KernelMappingInfo
+{
+    VirtualAddress vstart;
+    VirtualAddress vend;
+};
+
+/*
+ *  @brief Page table callback.
+ *
+ *  @param vstart the start of the kernel VM area.
+ *  @param vend the end of the kernel VM area.
+ *  @param 
+ * 
+ *  @return pointer to the PTE
+ */
+template<PageTableLevel ptl>
+void PageTableCallback(const size_t entryIndex, PageTableEntry &pte, void *pData);
+
+template<PageTableLevel ptl>
+void PageTableCallback(const size_t entryIndex, PageTableEntry &pte, void *pData)
+{
+    using CurrentAddressLevel = typename PageLevelToAddrLevel<ptl>::Level;
+
+    KernelMappingInfo * const pKernelMappingInfo = reinterpret_cast<KernelMappingInfo *>(pData);
+
+    if constexpr (ptl == TABLE_LEVEL2)
+    {
+        if ((PageTable::PAGE_TABLE_COUNT - 1) == entryIndex)
+            return;
+    }
+    
+    if (pte.IsPresent())
+    {
+        if (pKernelMappingInfo->vstart.GetLevel<CurrentAddressLevel>() > entryIndex)
+            pKernelMappingInfo->vstart.SetLevel<CurrentAddressLevel>(entryIndex);
+        
+        pKernelMappingInfo->vend.SetLevel<CurrentAddressLevel>(entryIndex);
+
+        //! Can't go lower than TABLE_LEVEL1 since that entry points to a 4K page.
+        if constexpr (ptl != TABLE_LEVEL1)
+        {
+            if (!pte.IsHugePage())
+            {
+                constexpr PageTableLevel lowerLever = LowerPageLevel<ptl>::m_level;
+
+                PageTable *pLowerPageTable = static_cast<PageTable *>(VirtualAddress::Create(pte.GetPhysicalAddress()));
+                pLowerPageTable->ForEachEntry(PageTableCallback<lowerLever>, pData);
+            }
+            else
+            {
+                pKernelMappingInfo->vend += PAGE_2M;
+            }
+            
+        }
+    }
+}
+
+template void PageTableCallback<TABLE_LEVEL4>(const size_t entryIndex, PageTableEntry &pte, void *pData);
+template void PageTableCallback<TABLE_LEVEL3>(const size_t entryIndex, PageTableEntry &pte, void *pData);
+template void PageTableCallback<TABLE_LEVEL2>(const size_t entryIndex, PageTableEntry &pte, void *pData);
+template void PageTableCallback<TABLE_LEVEL1>(const size_t entryIndex, PageTableEntry &pte, void *pData);
+
+} // namespace
+
+// ---------------------------------------------------------------------------------------------------------
 
 KernelAddressSpace::KernelAddressSpace(MM::PageTable * const pPageTable) :
     AddressSpace(pPageTable)
@@ -18,113 +94,109 @@ KernelAddressSpace::KernelAddressSpace(MM::PageTable * const pPageTable) :
 
 // ---------------------------------------------------------------------------------------------------------
 
-VirtualPage *KernelAddressSpace::GetVirtualPage(const VirtualAddress virtualAddress)
+void *KernelAddressSpace::Allocate(size_t nBytes, const PageSize pageSize, const PageFlags pageFlags)
 {
-    const Address_t relocatedAddress = virtualAddress.PageAddress(PAGE_2M).Get() - (Address_t)KERNEL_VMA;
-    if (relocatedAddress > GetMaximumKernelAddressSpaceSize())
-        ASSERT(false);
 
-    const size_t pageIndex = static_cast<size_t>(relocatedAddress / PAGE_2M);
-    return &m_pVirtualPages[pageIndex];
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void KernelAddressSpace::Initialize()
 {
-    m_nVirtualPages = Max(static_cast<size_t>(MINIMUM_KERNEL_PAGES), (Pmm::Get().GetMemoryStats().m_totalMemory / KERNEL_MEMORY_FACTOR) / KERNEL_PAGE_SIZE);
-    m_pVirtualPages = static_cast<VirtualPage *>(kmalloc_eternal(m_nVirtualPages));
+    m_pVMAreaPtr = static_cast<VMArea **>(kmalloc_eternal(sizeof(VMArea * ) * MAX_SMALL_KERNEL_PAGES));
+    memset(m_pVMAreaPtr, 0, sizeof(VMArea * ) * MAX_SMALL_KERNEL_PAGES);
 
     SynchronizeKernelAddressSpace();
+
+    m_addressBreak = reinterpret_cast<Address_t>(get_kmalloc_eternal_ptr());
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 void KernelAddressSpace::SynchronizeKernelAddressSpace()
 {
-    for (size_t pageIndex = 0; pageIndex < m_nVirtualPages; ++pageIndex)
+    //! Synchronize the kernel address space.
+    //! Iterate over kernel page tables.
+
+    KernelMappingInfo kernelMappingInfo;
+    kernelMappingInfo.vstart = VirtualAddress::Create(PhysicalAddress(0));
+    kernelMappingInfo.vend = VirtualAddress((Address_t)__kernel_virtual_end).PageAddress(PAGE_2M);
+    m_pPageTable->ForEachEntry(PageTableCallback<TABLE_LEVEL4>, reinterpret_cast<void *>(&kernelMappingInfo));
+
+    VMArea &VMArea = m_kernelVMArea;
+    m_pVMAreaPtr[0] = &m_kernelVMArea;
+    ++m_nVMAreas;
+
+    VMArea.m_vstart = kernelMappingInfo.vstart;
+    VMArea.m_vend = kernelMappingInfo.vend;
+    VMArea.m_pAddressSpace = this;
+
+    VMArea.Initialize(kernelMappingInfo.vstart, kernelMappingInfo.vend, *this, HUGE_PAGE);
+
+    size_t VMAreaSize = (PhysicalAddress::Create(VMArea.m_vend) - PhysicalAddress::Create(VMArea.m_vstart)).Get();
+
+    const size_t nPhysicalPages = VMAreaSize / PhysicalPage::m_pageSize;
+
+    void *pMalloc = get_kmalloc_eternal_ptr();
+
+    VMArea.m_physicalRange = (std::move(Pmm::Get().AllocateRange(PhysicalAddress::Create(VMArea.m_vstart), nPhysicalPages)));
+
+    /*
+    //! Kernel boots up in huge page mode only for now.
+    for (size_t pageIndex = 0; pageIndex < MAX_HUGE_KERNEL_PAGES; ++pageIndex)
     {
-        const VirtualAddress virtualAddress((pageIndex * PAGE_2M) + (Address_t)KERNEL_VMA);
+        const VirtualAddress virtualAddress(PageIndexToAddress(pageIndex, PAGE_2M));
 
         // Stop allocating pages once the entire kernel space is allocated.
         if (virtualAddress >= get_kmalloc_eternal_ptr())
             break;
 
-        // Get p3 table entry
-        PageTableEntry &p3TableEntry = m_pPageTable->GetPte<TABLE_LEVEL4>(virtualAddress);
-        PageTable *pP3Table = nullptr;
+        PageTableEntry *pP1TableEntry = FindPageTableEntry(virtualAddress);
+        if (!pP1TableEntry)
+            ASSERT(false); // Impossible to fail here.
 
-        //! Should never happen.
-        if (!p3TableEntry.IsPresent())
-        {
-            //! Allocate p3 table.
-            p3TableEntry.SetPhysicalAddress(PhysicalAddress::Create(
-                VirtualAddress(kmalloc_eternal_aligned(sizeof(PageTable), PAGE_SIZE))));
+        VMArea &VMArea = m_pVMAreas[pageIndex];
+        MemoryPool::PhysicalRange physicalRange(std::move(Pmm::Get().AllocateRange(PhysicalAddress::Create(virtualAddress), PAGE_2M / PhysicalPage::m_pageSize)));
 
-            //! Set the entry flags.
-            p3TableEntry.SetPresent(1);
-            p3TableEntry.SetWritable(1);
-            p3TableEntry.SetUserAccessible(0);
-            p3TableEntry.SetWriteThrough(1);
-            p3TableEntry.SetCacheDisabled(0);
-            p3TableEntry.SetHugePage(0);
-            p3TableEntry.SetGlobal(1);
-            p3TableEntry.SetNoExecute(0);
-        }
+        //VMArea.Initialize(virtualAddress, *this);
+        ++m_nVMAreas;
+    }*/ 
+}
 
-        //! HACK: translate physical address to virtual because it's guaranteed the page is mapped.
-        pP3Table = static_cast<PageTable *>(VirtualAddress::Create(p3TableEntry.GetPhysicalAddress()));
+// ---------------------------------------------------------------------------------------------------------
 
-        // Get p2 table entry
-        PageTableEntry &p2TableEntry = pP3Table->GetPte<TABLE_LEVEL3>(virtualAddress);
-        PageTable *pP2Table = nullptr;
+MM::PageTableEntry *KernelAddressSpace::FindPageTableEntry(const VirtualAddress vAddr)
+{
+    // Get p3 table entry.
+    PageTableEntry &p3TableEntry = m_pPageTable->GetPte<TABLE_LEVEL4>(vAddr);
+    PageTable *pP3Table = nullptr;
 
-        //! Should never happen.
-        if (!p2TableEntry.IsPresent())
-        {
-            //! Allocate p2 table.
-            p2TableEntry.SetPhysicalAddress(PhysicalAddress::Create(
-                VirtualAddress(kmalloc_eternal_aligned(sizeof(PageTable), PAGE_SIZE))));
+    if (!p3TableEntry.IsPresent())
+        return nullptr;
 
-            //! Set the entry flags.
-            p2TableEntry.SetPresent(1);
-            p2TableEntry.SetWritable(1);
-            p2TableEntry.SetUserAccessible(0);
-            p2TableEntry.SetWriteThrough(1);
-            p2TableEntry.SetCacheDisabled(0);
-            p2TableEntry.SetHugePage(0);
-            p2TableEntry.SetGlobal(1);
-            p2TableEntry.SetNoExecute(0);
-        }
+    //! HACK: translate physical address to virtual because it's the kernel space.
+    pP3Table = static_cast<PageTable *>(VirtualAddress::Create(p3TableEntry.GetPhysicalAddress()));
 
-        //! HACK: translate physical address to virtual because it's guaranteed the page is mapped.
-        pP2Table = static_cast<PageTable *>(VirtualAddress::Create(p2TableEntry.GetPhysicalAddress()));
+    // Get p2 table entry.
+    PageTableEntry &p2TableEntry = pP3Table->GetPte<TABLE_LEVEL3>(vAddr);
+    PageTable *pP2Table = nullptr;
 
-        // Get p1 table entry
-        PageTableEntry &p1TableEntry = pP2Table->GetPte<TABLE_LEVEL2>(virtualAddress);
+    if (!p2TableEntry.IsPresent())
+        return nullptr;
+    
+    //! HACK: translate physical address to virtual because it's the kernel space.
+    pP2Table = static_cast<PageTable *>(VirtualAddress::Create(p2TableEntry.GetPhysicalAddress()));
 
-        //! Should never happen.
-        if (!p1TableEntry.IsPresent())
-        {
-            //! Allocate p1 table.
-            p1TableEntry.SetPhysicalAddress(PhysicalAddress::Create(
-                VirtualAddress(kmalloc_eternal_aligned(sizeof(PageTable), PAGE_SIZE))));
+    // Return p1 table entry.
+    return &pP2Table->GetPte<TABLE_LEVEL2>(vAddr);
+}
 
-            //! Set the entry flags.
-            p1TableEntry.SetPresent(1);
-            p1TableEntry.SetWritable(1);
-            p1TableEntry.SetUserAccessible(0);
-            p1TableEntry.SetWriteThrough(1);
-            p1TableEntry.SetCacheDisabled(0);
-            p1TableEntry.SetHugePage(0);
-            p1TableEntry.SetGlobal(1);
-            p1TableEntry.SetNoExecute(0);
-        }
+// ---------------------------------------------------------------------------------------------------------
 
-        VirtualPage &virtualPage = m_pVirtualPages[pageIndex];
-        MemoryPool::PhysicalRange physicalRange = Pmm::Get().AllocateRange(PhysicalAddress::Create(virtualAddress), PAGE_2M / PhysicalPage::m_pageSize);
-        virtualPage.Initialize(virtualAddress, *this, &p1TableEntry, std::move(physicalRange), PAGE_2M);
-    }
+bool KernelAddressSpace::IsKernelAddress(const VirtualAddress vAddr)
+{
+    return (vAddr >= KERNEL_BEGIN_ADDRESS) && (vAddr.Get() < TEMP_MAP_ADDR_BASE);
 }
 
 } // namespace MM

@@ -8,7 +8,9 @@
     d(1, FAILURE,           "failure")    \
     d(2, INVALID_PARAMETER, "invalid parameter")    \
     d(3, ALREADY_MAPPED,    "already mapped")   \
-    d(4, RESERVED,          "reserved")
+    d(4, RESERVED,          "reserved") \
+    d(5, NOT_PRESENT,       "not present")  \
+    d(6, NOT_FOUND,         "not found")
 
 #define DEFINE_STATUS_CODE(statusNum, statusCode, statusCodeStr) const StatusCode JOIN(STATUS_CODE_, statusCode) = statusNum;
 

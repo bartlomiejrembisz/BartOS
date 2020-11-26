@@ -12,21 +12,29 @@ namespace MM
 /*
  *  @brief The kernel address space class.
  */
-class KernelAddressSpace : public AddressSpace
+class KernelAddressSpace final : public AddressSpace
 {
 public:
+    //! AddressSpace interface.
+    virtual void *Allocate(size_t nBytes, const PageSize pageSize, const PageFlags pageFlags = NO_FLAGS) override;
+
     /*
-     *  @brief Retrieve a Virtual Page object.
+     *  @brief Is the virtual address a higher half (kernel) address.
+     *
+     *  @param  vAddr the virtual address.
      * 
-     *  @param virtualAddress the virtual address of the page.
+     *  @return whether the address is a kernel address.
      */
-    virtual VirtualPage *GetVirtualPage(const VirtualAddress virtualAddress) override;
+    static bool IsKernelAddress(const VirtualAddress vAddr);
 
 private:
-    static const size_t MINIMUM_KERNEL_PAGES = MIN_KERNEL_SIZE / PAGE_2M;       ///< Minimum amount of kernel pages.
-    static const size_t KERNEL_MEMORY_FACTOR = 6;                               ///< What factor of total memory should be given to the kernel
+    static const Address_t TEMP_MAP_ADDR_BASE = TEMP_MAP_ADDR;                                      ///< The address of the temporary mapping.
+    static const size_t TEMP_MAP_SIZE = (0xFFFFFFFFFFFFFFFF - TEMP_MAP_ADDR_BASE);                  ///< The size of the temp map.
+    
+    static const size_t MAX_SMALL_KERNEL_PAGES = (MAX_KERNEL_SIZE - (TEMP_MAP_SIZE)) / PAGE_2M;     ///< Maximum amount of small kernel pages.
+    static const size_t MAX_HUGE_KERNEL_PAGES = (MAX_KERNEL_SIZE - (TEMP_MAP_SIZE)) / PAGE_4K;      ///< Minimum amount of huge pages.
 
-    static const PageSize KERNEL_PAGE_SIZE = PAGE_2M;                           ///< The kernel page size 
+    static const VirtualAddress KERNEL_BEGIN_ADDRESS;           ///< The address of the start of the kernel.
 
     /*
      *  @brief Constructor
@@ -44,14 +52,24 @@ private:
     void SynchronizeKernelAddressSpace();
 
     /*
-     *  @brief Get the maxium kernel address space size.
+     *  @brief Find the huge page table entry from a virtual address.
+     *
+     *  @param vAddr the virtual address.
+     * 
+     *  @return pointer to the PTE
+     */
+    MM::PageTableEntry *FindPageTableEntry(const VirtualAddress vAddr);
+
+    /*
+     *  @brief Get the maximum kernel address space size.
      *
      *  @return the maximum size of the kernel address space.
      */
     size_t GetMaximumKernelAddressSpaceSize();
 
-    VirtualPage     *m_pVirtualPages;   ///< The virtual page pointer pool.
-    size_t          m_nVirtualPages;    ///< The number of virtual pages.
+    VMArea          m_kernelVMArea;     ///< The contiguous kernel VMArea.
+    VMArea          **m_pVMAreaPtr;     ///< The VMArea lookup table.
+    size_t          m_nVMAreas;         ///< The number of small pages allocated.
 
     friend class MM::Vmm;
 };
@@ -60,10 +78,7 @@ private:
 
 inline size_t KernelAddressSpace::GetMaximumKernelAddressSpaceSize()
 {
-    if ((!m_pVirtualPages) && (m_nVirtualPages == 0))
-        return ~0;
-
-    return m_nVirtualPages * KERNEL_PAGE_SIZE;
+    return MAX_KERNEL_SIZE;
 }
 
 } // namespace MM

@@ -1,12 +1,15 @@
 #ifndef VMM_H
 #define VMM_H
 
+#include "Kernel/Arch/x86_64/Interrupts/PageFaultHandler.h"
+
 #include "Kernel/BartOS.h"
 #include "Libraries/Misc/Singleton.h"
 
 #include "Paging/PageTable.h"
 
 #include "KernelAddressSpace.h"
+#include "KernelHeap.h"
 
 namespace BartOS
 {
@@ -22,6 +25,9 @@ public:
 
     //! Initialize the VMM.
     void Initialize();
+
+    //! Get the kernel heap.
+    KernelHeap &GetKernelHeap();
 
     /*
      *  @brief Map a kernel virtual page. 
@@ -93,6 +99,14 @@ public:
                       const PageFlags pageFlags, const PageSize pageSize);
 
     /*
+     *  @brief Allocate physical storage for the virtual page.
+     *
+     *  @param addressSpace the address space.
+     *  @param VMArea the virtual page.
+     */
+    void AllocatePage(AddressSpace &addressSpace, VMArea &VMArea);
+
+    /*
      *  @brief Get the end address.
      *
      *  @return the end address.
@@ -100,8 +114,6 @@ public:
     PhysicalAddress GetEndAddress();
 
 private:
-    static const uint64_t TEMP_ENTRY_ADDR_BASE = 0xFFFFFFFFFFE00000;
-
     static PageTable * const m_pTempMapTable;  ///< Level 1 page table used to map temporary pages. Always mapped as last 2MiB in kernel address space.
 
     /*
@@ -148,9 +160,12 @@ private:
      */
     static uint8_t *MapPage(const PhysicalAddress &physicalAddress);
 
-    KernelAddressSpace  m_kernelAddressSpace;       ///< The kernel address space object.
-    bool                m_isInitialized;            ///< Whether the object is initialized.
+    KernelHeap                      m_kernelHeap;               ///< The kernel heap.
+    KernelAddressSpace              m_kernelAddressSpace;       ///< The kernel address space object.
+    Interrupt::PageFaultHandler     m_pageFaultHandler;         ///< The page fault handler.
+    bool                            m_isInitialized;            ///< Whether the object is initialized.
 
+    friend class Interrupt::PageFaultHandler;
     friend class Singleton<Vmm>;
 };
 

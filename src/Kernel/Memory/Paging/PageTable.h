@@ -17,7 +17,6 @@ class PageTable
 {
 public:
     static constexpr TableEntryIndex PAGE_TABLE_COUNT = 512;
-    static constexpr PageTableIndex PAGE_TABLE_LEVEL_COUNT = 4;
 
     //! Constructor.
     PageTable();
@@ -47,10 +46,48 @@ public:
     template <PageTableLevel LEVEL>
     const PageTableEntry &GetPte(const VirtualAddress &virtualAddress) const;
 
+    /*
+     *  @brief Iterate over page table.
+     *  Recursive callbacks need a terminator statement.
+     * 
+     *  @param callback callback for each entry.
+     *  @param pData pointer to additional data.
+     */
+    template<typename T>
+    void ForEachEntry(T callback, void *pData);
+
+    /*
+     *  @brief Iterate over page table.
+     *  Recursive callbacks need a terminator statement.
+     * 
+     *  @param callback callback for each entry.
+     *  @param pData pointer to additional data.
+     */
+    template<typename T>
+    void ForEachEntry(T callback, void *pData) const;
+
     PageTableEntry  m_entries[PAGE_TABLE_COUNT];
 };
 
 static_assert(sizeof(PageTable) == 4096);
+
+// ---------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline auto PageTable::ForEachEntry(T callback, void *pData) -> void
+{
+    for (size_t i = 0; i < PAGE_TABLE_COUNT; ++i)
+        callback(i, m_entries[i], pData);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+template<typename T>
+inline auto PageTable::ForEachEntry(T callback, void *pData) const -> void
+{
+    for (size_t i = 0; i < PAGE_TABLE_COUNT; ++i)
+        callback(i, m_entries[i], pData);
+}
 
 } // namespace MM
 
