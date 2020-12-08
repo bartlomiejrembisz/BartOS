@@ -1,5 +1,5 @@
 bits 32
-KERNEL_VIRTUAL_BASE equ 0xFFFFFFFFC0000000
+KERNEL_VIRTUAL_BASE equ 0xFFFFFFFF80000000
 
 section .bss
 align 16
@@ -19,8 +19,9 @@ p4_table:
 align 4096
 p3_table:
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
-    times (510) dq 0
+    times (509) dq 0
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
+    times (1) dq 0
 
 align 4096
 p2_table:
