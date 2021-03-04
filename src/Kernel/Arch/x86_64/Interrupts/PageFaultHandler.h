@@ -1,7 +1,7 @@
 #ifndef PAGE_FAULT_HANDLER_H
 #define PAGE_FAULT_HANDLER_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 
 #include "Interrupt.h"
 
@@ -11,10 +11,7 @@ namespace BartOS
 //! Forward declare the Vmm.
 namespace MM { class Vmm; }
 
-inline namespace x86_64
-{
-
-namespace Interrupt
+namespace x86_64
 {
 
 //! Page fault handler class.
@@ -53,8 +50,6 @@ public:
 private:
     MM::Vmm     &m_vmm;
 };
-
-} // namespace Interrupt
 
 } // namespace x86_64
 

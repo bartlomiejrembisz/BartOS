@@ -16,32 +16,42 @@ SECTIONS
     /* Multiboot header. */
     .multiboot ALIGN(4K): AT(ADDR(.multiboot) - KERNEL_VMA)
     {
+        __multiboot_start = .;
         *(.multiboot)
+        __multiboot_end = .;
     }
 
     /* Kernel */
     .text ALIGN(4K) : AT(ADDR(.text) - KERNEL_VMA)
     {
+        __text_start = .;
         *(.text)
+        __text_end = .;
     }
 
     /* Read-only data. */
     .rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_VMA)
     {
+        __rodata_start = .;
         *(.rodata)
+        __rodata_end = .;
     }
 
     /* Read-write data (initialized) */
     .data ALIGN(4K) : AT(ADDR(.data) - KERNEL_VMA)
     {
+        __data_start = .;
         *(.data)
+        __data_end = .;
     }
 
     /* Read-write data (uninitialized) and stack */
     .bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_VMA)
     {
+        __bss_start = .;
         *(COMMON)
         *(.bss)
+        __bss_end = .;
     }
 
     __kernel_virtual_end = .;

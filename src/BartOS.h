@@ -7,11 +7,10 @@
 
 #include "Kernel/Arch/x86_64/io.h"
 
-#include "Memory/Memory.h"
-
 #include "frg/macros.hpp"
 
 #include "CoreDefs.h"
+#include "DataStructures.h"
 
 #define ASSERT(cond) FRG_ASSERT(cond)
 

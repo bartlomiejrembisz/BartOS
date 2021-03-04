@@ -5,7 +5,7 @@
 namespace BartOS
 {
 
-namespace MM
+namespace x86_64
 {
 
 bool PageTableEntry::SetPresent(const bool isPresent)
@@ -105,7 +105,7 @@ bool PageTableEntry::IsPresent() const
 
 // ---------------------------------------------------------------------------------------------------------
 
-bool PageTableEntry::IsWritablePresent() const
+bool PageTableEntry::IsWritable() const
 {
     return Get<Writable>();
 }
@@ -174,10 +174,27 @@ void PageTableEntry::SetPageFlags(const PageFlags pageFlags)
     SetWritable(pageFlags & WRITABLE);
     SetUserAccessible(pageFlags & USER_ACCESSIBLE);
     SetWriteThrough(pageFlags & WRITE_THROUGH);
-    SetCacheDisabled(pageFlags & DISABLE_CACHE);
+    SetCacheDisabled(pageFlags & CACHE_DISABLED);
     SetHugePage(pageFlags & HUGE_PAGE);
     SetGlobal(pageFlags & GLOBAL);
     SetNoExecute(pageFlags & NO_EXECUTE);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+
+PageFlags PageTableEntry::GetPageFlags() const
+{
+    PageFlags pageFlags = NO_FLAGS;
+    pageFlags |= (IsPresent() ? PRESENT : static_cast<PageFlags>(0));
+    pageFlags |= (IsWritable() ? WRITABLE : static_cast<PageFlags>(0));
+    pageFlags |= (IsUserAccessible() ? USER_ACCESSIBLE : static_cast<PageFlags>(0));
+    pageFlags |= (IsWriteThrough() ? WRITE_THROUGH : static_cast<PageFlags>(0));
+    pageFlags |= (IsCacheDisabled() ? CACHE_DISABLED : static_cast<PageFlags>(0));
+    pageFlags |= (IsHugePage() ? HUGE_PAGE : static_cast<PageFlags>(0));
+    pageFlags |= (IsGlobal() ? GLOBAL : static_cast<PageFlags>(0));
+    pageFlags |= (IsNoExecute() ? NO_EXECUTE : static_cast<PageFlags>(0));
+
+    return pageFlags;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -194,38 +211,6 @@ const BartOS::PhysicalAddress PageTableEntry::GetPhysicalAddress() const
     return BartOS::PhysicalAddress(Get<PageTableEntry::PhysicalAddress>() << 12);
 }
 
-// ---------------------------------------------------------------------------------------------------------
-
-PageTable *PageTableEntry::PageTablePtr()
-{
-    const Address_t address = (Get<PhysicalAddress>() << 12);
-    return reinterpret_cast<PageTable *>(ALIGN(address, PAGE_SIZE));
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-const PageTable *PageTableEntry::PageTablePtr() const
-{
-    const Address_t address = (Get<PhysicalAddress>() << 12);
-    return reinterpret_cast<PageTable *>(ALIGN(address, PAGE_SIZE));
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-uint8_t *PageTableEntry::PagePtr()
-{
-    const Address_t address = (Get<PhysicalAddress>() << 12);
-    return reinterpret_cast<uint8_t *>(ALIGN(address, PAGE_SIZE));
-}
-
-// ---------------------------------------------------------------------------------------------------------
-
-const uint8_t *PageTableEntry::PagePtr() const
-{
-    const Address_t address = (Get<PhysicalAddress>() << 12);
-    return reinterpret_cast<uint8_t *>(ALIGN(address, PAGE_SIZE));
-}
-
-} // namespace MM
+} // namespace x86_64
 
 } // namespace BartOS

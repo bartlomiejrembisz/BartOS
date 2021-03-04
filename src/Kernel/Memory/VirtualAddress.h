@@ -31,7 +31,7 @@ public:
      * 
      *  @param address the address.
      */
-    explicit VirtualAddress(const Address_t address);
+    VirtualAddress(const Address_t address);
 
     /*
      *  @brief Constructor
@@ -59,7 +59,7 @@ public:
     Layout::PageOffset::ValueType GetPageOffset() const;
 
     template<typename T>
-    typename T::ValueType GetLevel();
+    typename T::ValueType GetLevel() const;
 
     /*
      *  @brief Create VirtualAddress from PhysicalAddress.
@@ -89,7 +89,7 @@ void VirtualAddress::SetLevel(const typename T::ValueType value)
 // ---------------------------------------------------------------------------------------------------------
 
 template<typename T>
-typename T::ValueType VirtualAddress::GetLevel()
+typename T::ValueType VirtualAddress::GetLevel() const
 {
     return static_cast<typename T::ValueType>(T::Get(m_address));
 }

@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "c++/type_traits"
+
 namespace BartOS
 {
 
@@ -27,7 +29,12 @@ class RefPtr;
 template <typename TYPE>
 class RefCounter
 {
+private:
+    static_assert(!std::is_const<TYPE>::value, "TYPE cannot be const");
+
 public:
+    typedef TYPE Type;  ///< Expose the underlying type.
+
     /*
      *  @brief Get the ref count.
      * 
@@ -82,7 +89,7 @@ protected:
     {
         ASSERT(m_ref > 0);
         if (0 == --m_ref)
-            TYPE::OnDie(*this);
+            TYPE::OnDie(static_cast<TYPE &>(*this));
 
         return m_ref;
     }   
@@ -91,6 +98,7 @@ private:
     uint16_t    m_ref;      ///< The ref count.
 
     friend class RefPtr<TYPE>;
+    friend class RefPtr<std::add_const_t<TYPE>>;
 };
 
 } // namespace BartOS

@@ -1,7 +1,7 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 #include "Kernel/Arch/x86_64/CPU.h"
 
 #include "Isrs.h"
@@ -9,10 +9,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace Interrupt
+namespace x86_64
 {
 
 struct [[gnu::packed]] InterruptContext
@@ -38,13 +35,13 @@ struct [[gnu::packed]] InterruptContext
     uint64_t            m_rbx;
     uint64_t            m_rax;
 
-    Isrs::InterruptCode m_interruptCode;                ///< The interrupt code.
+    InterruptCode m_interruptCode;                ///< The interrupt code.
     uint64_t            m_errorCode;                    ///< The error code.
 
     // pushed by the CPU:
     uint64_t            m_rip;                          ///< The instruction pointer.
     uint64_t            m_cs;                           ///< The code segment.
-    CPU::RFLAGS::Type   m_rflags;                       ///< The rflags.
+    RFLAGS::Type   m_rflags;                       ///< The rflags.
     uint64_t            m_rsp;                          ///< The stack pointer.
     uint64_t            m_ss;                           ///< The stack segment.
 };
@@ -62,7 +59,7 @@ public:
      *  @param  pName the name of the interrupt.
      *  @param  interruptCode the interrupt code.
      */
-    InterruptHandler(const void *pUserData, const char *pName, const Isrs::InterruptCode interruptCode);
+    InterruptHandler(const void *pUserData, const char *pName, const InterruptCode interruptCode);
 
     //! Destructor.
     virtual ~InterruptHandler();
@@ -89,7 +86,7 @@ public:
 
     const void              *m_pUserData;
     const char              *m_pName;
-    Isrs::InterruptCode     m_interruptCode;
+    InterruptCode     m_interruptCode;
 };
 
 // ---------------------------------------------------------------------------------------------------------
@@ -110,8 +107,6 @@ void RegisterInterrupt(const InterruptHandler *pInterruptHandler);
  *  @param  interruptContext the interrupt context.
  */
 extern "C" void HandleInterrupt(InterruptContext interruptContext);
-
-} // namespace Interrupt
 
 } // namespace x86_64
 

@@ -63,13 +63,13 @@ public:
     operator POINTER*() const;
 
     //! Arithmetic operators.
-    ADDRESS operator+(const Address_t offset);
-    ADDRESS operator+(const Address<ADDRESS> &offset);
+    ADDRESS operator+(const Address_t offset) const;
+    ADDRESS operator+(const Address<ADDRESS> &offset) const;
     ADDRESS &operator+=(const Address_t offset);
     ADDRESS &operator+=(const Address<ADDRESS> &offset);
 
-    ADDRESS operator-(const Address_t offset);
-    ADDRESS operator-(const Address<ADDRESS> &offset);
+    ADDRESS operator-(const Address_t offset) const;
+    ADDRESS operator-(const Address<ADDRESS> &offset) const;
     ADDRESS &operator-=(const Address_t offset);
     ADDRESS &operator-=(const Address<ADDRESS> &offset);
 

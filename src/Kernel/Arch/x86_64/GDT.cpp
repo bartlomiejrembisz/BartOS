@@ -5,7 +5,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
+namespace x86_64
 {
 
 namespace

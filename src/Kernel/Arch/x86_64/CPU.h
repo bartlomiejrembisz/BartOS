@@ -1,17 +1,14 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 
 #include "Libraries/Misc/BitFields.h"
 
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace CPU
+namespace x86_64
 {
 
 //! The RFLAGS register bitmap.
@@ -264,8 +261,6 @@ void Invlpg(const Address_t virtualAddress);
 
 //! Invalidate the page in the TLB;
 void Invlpg(const VirtualAddress virtualAddress);
-
-} // namespace CPU
 
 } // namespace x86
 

@@ -4,7 +4,7 @@
 #include "CoreDefs.h"
 
 #include "frg/macros.hpp"
-#include "cxxshim/type_traits"
+#include "type_traits"
 
 namespace BartOS
 {

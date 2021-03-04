@@ -21,13 +21,17 @@ p3_table:
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
     times (509) dq 0
     dq p2_table - KERNEL_VIRTUAL_BASE + 0b11
-    times (1) dq 0
+    dq p2_temp_map_table - KERNEL_VIRTUAL_BASE + 0b11
 
 align 4096
 p2_table:
     dq 0x0000000000000000 + 0x83
     dq 0x0000000000200000 + 0x83
-    times (509) dq 0
+    times (510) dq 0
+
+align 4096
+p2_temp_map_table:
+    times (511) dq 0
     dq p1_temp_map_table - KERNEL_VIRTUAL_BASE + 0b11
 
 ; Last 2MB of the kernel address space are used for temporary mappings

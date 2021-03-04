@@ -1,7 +1,7 @@
 #ifndef GDT_H
 #define GDT_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 
 #include "Libraries/Misc/BitFields.h"
 #include "Libraries/Misc/Singleton.h"
@@ -9,7 +9,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
+namespace x86_64
 {
 
 class GlobalDescriptorTable : public Singleton<GlobalDescriptorTable>

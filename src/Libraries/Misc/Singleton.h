@@ -31,6 +31,12 @@ protected:
     Singleton();
 
 private:
+    Singleton(const Singleton &rhs) = delete;
+    Singleton(Singleton &&rhs) = delete;
+
+    Singleton &operator=(const Singleton &rhs) = delete;
+    Singleton &operator=(Singleton &&rhs) = delete;
+
     static CLASS m_singleton;
 };
 

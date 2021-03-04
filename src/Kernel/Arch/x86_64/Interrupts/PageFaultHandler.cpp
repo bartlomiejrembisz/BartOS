@@ -5,14 +5,11 @@
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace Interrupt
+namespace x86_64
 {
 
 PageFaultHandler::PageFaultHandler(MM::Vmm &vmm) :
-    InterruptHandler(nullptr, "PageFaultHandler", Isrs::EXCEPTION_PAGE_FAULT),
+    InterruptHandler(nullptr, "PageFaultHandler", EXCEPTION_PAGE_FAULT),
     m_vmm(vmm)
 {
 }
@@ -21,16 +18,18 @@ PageFaultHandler::PageFaultHandler(MM::Vmm &vmm) :
 
 StatusCode PageFaultHandler::Handle(const InterruptContext &interruptContext) const
 {
-    const VirtualAddress vAddrFault(CPU::GetCR2());
+    const VirtualAddress vAddrFault(GetCR2());
     const Flags &pageFaultFlags(reinterpret_cast<const Flags &>(interruptContext.m_errorCode));
 
     kprintf("Page Fault Address: %p\n", vAddrFault.Get());
     kprintf("Instruction Address: %p\n", interruptContext.m_rip);
 
-    MM::VMArea *pVMArea   = nullptr;
+    return STATUS_CODE_SUCCESS;
+
+    MM::VmArea *pVmArea   = nullptr;
     MM::AddressSpace *pAddressSpace = nullptr;
 
-    const bool isKernelAddress      = MM::KernelAddressSpace::IsKernelAddress(vAddrFault);
+    const bool isKernelAddress      = true; //MM::AddressSpace::IsKernelAddress(vAddrFault);
 
     const bool isProtectionFault    = (pageFaultFlags.Get<Flags::Present>() == Flags::PRESENT);
     const bool isNonPresentPage     = (pageFaultFlags.Get<Flags::Present>() == Flags::NOT_PRESENT);
@@ -47,15 +46,15 @@ StatusCode PageFaultHandler::Handle(const InterruptContext &interruptContext) co
             // SEGFAULT.
         }
         
-        //pVMArea = m_vmm.m_kernelAddressSpace.GetVMArea(vAddrFault);
-        pAddressSpace = &m_vmm.m_kernelAddressSpace;
+        //pVmArea = m_vmm.m_kernelAddressSpace.GetVmArea(vAddrFault);
+        //pAddressSpace = &m_vmm.m_kernelAddressSpace;
     }
     else
     {
         // Get user Address Space.
     }
     
-    ASSERT(pVMArea && pAddressSpace);
+    ASSERT(pVmArea && pAddressSpace);
 
     if (isProtectionFault)
     {
@@ -72,10 +71,10 @@ StatusCode PageFaultHandler::Handle(const InterruptContext &interruptContext) co
     else
     {
         //! Page not present.
-        if (pVMArea->GetFlags() & ALLOCATE_ON_DEMAND)
+        //if (pVmArea->GetFlags() & ALLOCATE_ON_DEMAND)
         {
             // Allocate the page regardless whether it was a user or not.
-            //pAddressSpace->AllocateOnDemand(*pVMArea);
+            //pAddressSpace->AllocateOnDemand(*pVmArea);
         }
     }
 
@@ -96,8 +95,6 @@ void PageFaultHandler::OnUnregister() const
     kprintf("PageFaultHandler unregistered\n");
     ASSERT(false);
 }
-
-} // namespace Interrupt
 
 } // namespace x86_64
 

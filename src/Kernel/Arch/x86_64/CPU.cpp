@@ -6,10 +6,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace CPU
+namespace x86_64
 {
 
 RFLAGS GetRFLAGS()
@@ -204,8 +201,6 @@ void Invlpg(const VirtualAddress virtualAddress)
 {
     Invlpg(virtualAddress.Get());
 }
-
-} // namespace CPU
 
 } // namespace x86
 

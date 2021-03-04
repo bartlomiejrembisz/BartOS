@@ -1,13 +1,13 @@
 #ifndef PAGE_TABLE_LEVEL_H
 #define PAGE_TABLE_LEVEL_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 #include "PageTableEntry.h"
 
 namespace BartOS
 {
 
-namespace MM
+namespace x86_64
 {
 
 /*
@@ -33,7 +33,7 @@ public:
      * 
      *  @return the page table level entry.
      */
-    template <PageTableLevel LEVEL>
+    template <PageMapLevel LEVEL>
     PageTableEntry &GetPte(const VirtualAddress &virtualAddress);
 
     /*
@@ -43,7 +43,7 @@ public:
      * 
      *  @return the page table level entry.
      */
-    template <PageTableLevel LEVEL>
+    template <PageMapLevel LEVEL>
     const PageTableEntry &GetPte(const VirtualAddress &virtualAddress) const;
 
     /*
@@ -89,7 +89,7 @@ inline auto PageTable::ForEachEntry(T callback, void *pData) const -> void
         callback(i, m_entries[i], pData);
 }
 
-} // namespace MM
+} // namespace x86_64
 
 } // namespace BartOS
 

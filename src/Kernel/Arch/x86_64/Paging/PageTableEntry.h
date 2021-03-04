@@ -1,13 +1,13 @@
 #ifndef PAGE_TABLE_ENTRY_H
 #define PAGE_TABLE_ENTRY_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 #include "Libraries/Misc/BitFields.h"
 
 namespace BartOS
 {
 
-namespace MM
+namespace x86_64
 {
 
 //! Forward declare the page table.
@@ -45,7 +45,7 @@ public:
 
     //! Getters
     bool IsPresent() const;
-    bool IsWritablePresent() const;
+    bool IsWritable() const;
     bool IsUserAccessible() const;
     bool IsWriteThrough() const;
     bool IsCacheDisabled() const;
@@ -61,6 +61,13 @@ public:
      *  @param pageFlags the page flags.
      */
     void SetPageFlags(const PageFlags pageFlags);
+    
+    /*
+     *  @brief Get the page flags.
+     * 
+     *  @return the page flags.
+     */
+    PageFlags GetPageFlags() const;
 
     /*
      *  @brief Set the physical address in the entry
@@ -76,39 +83,11 @@ public:
      *  @return the physical address..
      */
     const BartOS::PhysicalAddress GetPhysicalAddress() const;
-
-    /*
-     *  @brief Convert entry to a page table level pointer.
-     * 
-     *  @return pointer to the underlying page table entry.
-     */
-    PageTable *PageTablePtr();
-
-    /*
-     *  @brief Convert entry to a page table level pointer.
-     * 
-     *  @return pointer to the underlying page.
-     */
-    const PageTable *PageTablePtr() const;
-
-    /*
-     *  @brief Convert entry to a page pointer.
-     * 
-     *  @return pointer to the underlying page table entry.
-     */
-    uint8_t *PagePtr();
-
-    /*
-     *  @brief Convert entry to a page pointer.
-     * 
-     *  @return pointer to the underlying page.
-     */
-    const uint8_t *PagePtr() const;
 };
 
 static_assert(sizeof(PageTableEntry) == 8);
 
-} // namespace MM
+} // namespace x86_64
 
 } // namespace BartOS
 

@@ -4,23 +4,22 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <limits.h>
-#include <utility>
+#include "cxxshim/utility"
 
 namespace BartOS
 {
 
+//! Tag for running functions during kernel initailization.
+struct kernel_init_tag {};
+
 // Macros
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*a))
-
 #define JOIN(a, b) a##b
-
 #define STRINGIZE(a) #a
-
 #define ALWAYS_INLINE __attribute__((always_inline))
-
-#define ALIGN_TO_NEXT_BOUNDARY(addr, size) ((addr + (size - 1)) & (-size))
-
-#define ALIGN(addr, size) (addr & (-size))
+#define ALIGN_TO_NEXT_BOUNDARY(addr, alignment) (((addr) + (alignment - 1)) & (-alignment))
+#define ALIGN(addr, alignment) ((addr) & (-alignment))
+#define IS_ALIGNED(addr, alignment) (ALIGN((addr), (alignment)) == (addr))
 
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
@@ -34,13 +33,13 @@ typedef uintptr_t Address_t;    ///< The Address_t type definition.
 // Templates
 
 //! Bit operators for enums.
-template<class T> inline T operator~ (T a) { return (T)~(int)a; }
-template<class T> inline T operator| (T a, T b) { return (T)((int)a | (int)b); }
-template<class T> inline T operator& (T a, T b) { return (T)((int)a & (int)b); }
-template<class T> inline T operator^ (T a, T b) { return (T)((int)a ^ (int)b); }
-template<class T> inline T& operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); }
-template<class T> inline T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); }
-template<class T> inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }
+template<class T> inline constexpr T operator~ (T a) { return (T)~(int)a; }
+template<class T> inline constexpr T operator| (T a, T b) { return (T)((int)a | (int)b); }
+template<class T> inline constexpr T operator& (T a, T b) { return (T)((int)a & (int)b); }
+template<class T> inline constexpr T operator^ (T a, T b) { return (T)((int)a ^ (int)b); }
+template<class T> inline constexpr T& operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); }
+template<class T> inline constexpr T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); }
+template<class T> inline constexpr T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }
 
 // ---------------------------------------------------------------------------------------------------------
 

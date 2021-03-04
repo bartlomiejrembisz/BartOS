@@ -9,10 +9,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace IDT
+namespace x86_64
 {
 
 //! IDT descriptor
@@ -94,14 +91,12 @@ private:
     void SetGate(const uint16_t entry);
 
     Descriptor  m_descriptor;               //< The IDT descriptor.
-    Gate        m_gates[Isrs::NUM_OF_GATES];
+    Gate        m_gates[NUM_OF_GATES];
 
     friend class Singleton<InterruptDescriptorTable>;
 };
 
 using IDT = InterruptDescriptorTable;
-
-} // namespace IDT
 
 } // namespace x86
 

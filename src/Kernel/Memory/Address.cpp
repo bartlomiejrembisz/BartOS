@@ -73,7 +73,7 @@ Address<ADDRESS>::operator bool() const
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator+(const Address_t offset)
+ADDRESS Address<ADDRESS>::operator+(const Address_t offset) const
 {
     return ADDRESS(m_address + offset);
 }
@@ -81,7 +81,7 @@ ADDRESS Address<ADDRESS>::operator+(const Address_t offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator+(const Address<ADDRESS> &offset)
+ADDRESS Address<ADDRESS>::operator+(const Address<ADDRESS> &offset) const
 {
     return ADDRESS(*this + offset.Get());
 }
@@ -107,7 +107,7 @@ ADDRESS &Address<ADDRESS>::operator+=(const Address<ADDRESS> &offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator-(const Address_t offset)
+ADDRESS Address<ADDRESS>::operator-(const Address_t offset) const
 {
     return ADDRESS(m_address - offset);
 }
@@ -115,7 +115,7 @@ ADDRESS Address<ADDRESS>::operator-(const Address_t offset)
 // ---------------------------------------------------------------------------------------------------------
 
 template <typename ADDRESS>
-ADDRESS Address<ADDRESS>::operator-(const Address<ADDRESS> &offset)
+ADDRESS Address<ADDRESS>::operator-(const Address<ADDRESS> &offset) const
 {
     return ADDRESS(*this - offset.Get());
 }

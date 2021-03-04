@@ -11,12 +11,10 @@ namespace MM
 {
 
 template<size_t SLAB_SIZE>
-SlabAllocator<SLAB_SIZE>::SlabAllocator(const size_t totalSize)
-{
-    
-    m_mainSlabCache.Initialize(kmalloc(totalSize), totalSize);
+SlabAllocator<SLAB_SIZE>::SlabAllocator(const size_t initialSize)
+{   
+    m_mainSlabCache.Initialize(kmalloc(initialSize), initialSize);
     m_totalSlabsAvailable = m_mainSlabCache.m_nSlabsLeft;
-    m_totalSize = totalSize;
 
     m_slabCacheList.push_back(&m_mainSlabCache);
 }
@@ -25,27 +23,27 @@ SlabAllocator<SLAB_SIZE>::SlabAllocator(const size_t totalSize)
 
 template<size_t SLAB_SIZE>
 SlabAllocator<SLAB_SIZE>::SlabAllocator() :
-    m_totalSlabsAvailable(0),
-    m_totalSize(0)
+    m_totalSlabsAvailable(0)
 {
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 template<size_t SLAB_SIZE>
-SlabAllocator<SLAB_SIZE>::SlabAllocator(const size_t totalSize, kmalloc_eternal_tag)
+SlabAllocator<SLAB_SIZE>::SlabAllocator(const size_t initialSize, kernel_init_tag)
 {
-    Initialize(totalSize, kmalloc_eternal_tag());
+    Initialize(initialSize, kernel_init_tag());
 }
 
 // ---------------------------------------------------------------------------------------------------------
 
 template<size_t SLAB_SIZE>
-void SlabAllocator<SLAB_SIZE>::Initialize(const size_t totalSize, kmalloc_eternal_tag)
+void SlabAllocator<SLAB_SIZE>::Initialize(const size_t initialSize, kernel_init_tag)
 {
-    m_mainSlabCache.Initialize(kmalloc_eternal_aligned(totalSize, SLAB_SIZE), totalSize);
+    ASSERT (initialSize >= SLAB_SIZE);
+    
+    m_mainSlabCache.Initialize(kmalloc_eternal_aligned(initialSize, SLAB_SIZE), initialSize);
     m_totalSlabsAvailable = m_mainSlabCache.m_nSlabsLeft;
-    m_totalSize = totalSize;
 
     m_slabCacheList.push_back(&m_mainSlabCache);
 }
@@ -55,12 +53,6 @@ void SlabAllocator<SLAB_SIZE>::Initialize(const size_t totalSize, kmalloc_eterna
 template<size_t SLAB_SIZE>
 void *SlabAllocator<SLAB_SIZE>::Allocate()
 {
-    const size_t percentSlabsLeft = (GetTotalSlabsAvailable() - GetFreeSlabsLeft()) / GetTotalSlabsAvailable();
-    if (percentSlabsLeft < 10)
-    {
-        //! TODO: Allocate new Slab Cache.        
-    }
-    
     void *pAlloc = nullptr;
     for (SlabCache *pSlabCache : m_slabCacheList)
     {
@@ -70,6 +62,10 @@ void *SlabAllocator<SLAB_SIZE>::Allocate()
             break;
         }
     }
+
+    ASSERT(pAlloc);
+
+    memset(pAlloc, 0, m_slabSize);
 
     return pAlloc;
 }
@@ -224,6 +220,9 @@ template class SlabAllocator<512>;
 template class SlabAllocator<1024>;
 template class SlabAllocator<2048>;
 template class SlabAllocator<4096>;
+template class SlabAllocator<8192>;
+template class SlabAllocator<16384>;
+template class SlabAllocator<32768>;
 
 } // namespace MM
 

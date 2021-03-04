@@ -6,10 +6,7 @@
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace Interrupt
+namespace x86_64
 {
 
 namespace
@@ -22,7 +19,7 @@ const InterruptHandler *g_pInterruptHandlers[256];
 // ---------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------
 
-InterruptHandler::InterruptHandler(const void *pUserData, const char *pName, const Isrs::InterruptCode interruptCode) :
+InterruptHandler::InterruptHandler(const void *pUserData, const char *pName, const InterruptCode interruptCode) :
     m_pUserData(pUserData),
     m_pName(pName),
     m_interruptCode(interruptCode)
@@ -39,7 +36,7 @@ InterruptHandler::~InterruptHandler()
 
 StatusCode InterruptHandler::Handle(const InterruptContext &interruptContext) const
 {
-    kprintf("Handled IRQ %u - %s", Isrs::GetIrqCode(interruptContext.m_interruptCode), (m_pName) ? m_pName : "");
+    kprintf("Handled IRQ %u - %s", GetIrqCode(interruptContext.m_interruptCode), (m_pName) ? m_pName : "");
 
     return STATUS_CODE_SUCCESS;
 }
@@ -87,10 +84,14 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
         }
         else
         {
-            //kprintf("Undefined IRQ handler %u\n", Isrs::GetIrqCode(interruptContext.interrupt_num));
+            if (x86_64::EXCEPTION_INVALID_OPCODE == interruptContext.m_interruptCode)
+            {
+                kprintf("Invalid opcode instruction address: %p\n", interruptContext.m_rip);  
+            }
+            //kprintf("Undefined IRQ handler %u\n", GetIrqCode(interruptContext.interrupt_num));
         }
 
-        if (!Isrs::IsException(interruptContext.m_errorCode))
+        if (!IsException(interruptContext.m_errorCode))
         {
             //! Send an EOI ack to the PICs.
             if (interruptContext.m_interruptCode >= 40)
@@ -98,8 +99,6 @@ extern "C" void HandleInterrupt(InterruptContext interruptContext)
             out_byte(0x20, 0x20);   // master
         }
 }
-
-} // namespace Interrupt
 
 } // namespace x86_64
 

@@ -1,15 +1,12 @@
 #ifndef ISRS_H
 #define ISRS_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 
 namespace BartOS
 {
 
-inline namespace x86_64
-{
-
-namespace Isrs
+namespace x86_64
 {
 
 //  CODE    ENUMERATION         MNEMONIC                            TYPE            ERROR CODE?
@@ -413,8 +410,6 @@ extern "C" void interrupt_request_handler_252();
 extern "C" void interrupt_request_handler_253();
 extern "C" void interrupt_request_handler_254();
 extern "C" void interrupt_request_handler_255();
-
-} // namespace Isrs
 
 } // namespace x86_64
 

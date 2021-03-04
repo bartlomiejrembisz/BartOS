@@ -3,14 +3,13 @@
 
 #include "RefCounter.h"
 
+#include "c++/type_traits"
+
 namespace BartOS
 {
 
 /*
  *  @brief Smart pointer for a ref counted object.
- * 
- *  Note: Kind of weird semantics, the RefPtr object needs to be const for const object references *shrug*.
- *        No way to make a const pointer.
  */
 template <typename TYPE>
 class RefPtr
@@ -21,7 +20,7 @@ public:
      * 
      *  @param pType the pointer to the type.
      */
-    explicit RefPtr(RefCounter<TYPE> *pType = nullptr) :
+    RefPtr(TYPE *pType = nullptr) :
         m_pType(pType)
     {
         if (m_pType)
@@ -33,11 +32,8 @@ public:
      *
      *  @param rhs ref ptr to move from
      */
-    explicit RefPtr(const RefPtr<TYPE> &rhs)
+    RefPtr(const RefPtr<TYPE> &rhs)
     {
-        if (m_pType)
-            m_pType->DecrementRefCount();
-
         m_pType = rhs.m_pType;
 
         if (m_pType)
@@ -49,11 +45,8 @@ public:
      *
      *  @param rhs ref ptr to move from
      */
-    explicit RefPtr(RefPtr<TYPE> &&rhs)
+    RefPtr(RefPtr<TYPE> &&rhs)
     {
-        if (m_pType)
-            m_pType->DecrementRefCount();
-            
         m_pType = rhs.m_pType;
 
         rhs.m_pType = nullptr;
@@ -73,7 +66,7 @@ public:
      * 
      *  @return this ref ptr
      */
-    RefPtr<TYPE> &operator=(const RefPtr<TYPE> &rhs) const
+    RefPtr<TYPE> &operator=(const RefPtr<TYPE> &rhs)
     {
         if (m_pType)
             m_pType->DecrementRefCount();
@@ -81,6 +74,8 @@ public:
         m_pType = rhs.m_pType;
         if (m_pType)
             m_pType->IncrementRefCount();
+
+        return *this;
     }
 
     /*
@@ -90,13 +85,15 @@ public:
      *
      *  @return this ref ptr
      */
-    RefPtr<TYPE> &operator==(RefPtr<TYPE> &&rhs) const
+    RefPtr<TYPE> &operator==(RefPtr<TYPE> &&rhs)
     {
         if (m_pType)
             m_pType->DecrementRefCount();
             
         m_pType == rhs.m_pType;
         rhs.m_pType = nullptr;
+
+        return *this;
     }
 
     /*
@@ -160,7 +157,9 @@ public:
     }
 
 private:
-    mutable RefCounter<TYPE>    *m_pType;   ///< Pointer to the underlying ref counter type.
+    static_assert(!std::is_const<TYPE>::value, "TYPE cannot be a const");
+
+    RefCounter<TYPE>  *m_pType;   ///< Pointer to the underlying ref counter type.
 };
 
 }

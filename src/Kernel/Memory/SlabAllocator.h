@@ -1,7 +1,7 @@
 #ifndef SLAB_ALLOCATOR_H
 #define SLAB_ALLOCATOR_H
 
-#include "Kernel/BartOS.h"
+#include "BartOS.h"
 
 #include "Libraries/libc/string.h"
 
@@ -12,8 +12,6 @@ namespace BartOS
 
 namespace MM
 {
-
-struct kmalloc_eternal_tag {};
 
 class KernelHeap;
 
@@ -27,9 +25,9 @@ public:
     /*
      *  @brief Constructor
      * 
-     *  @param totalSize the total size of the slab pool.
+     *  @param initialSize the total size of the slab pool.
      */
-    SlabAllocator(const size_t totalSize);
+    SlabAllocator(const size_t initialSize);
 
     /*
      *  @brief Allocate a slab.
@@ -78,17 +76,17 @@ private:
      *  @brief Constructor
      *  Only used by KernelHeap to initially construct the Slab Allocator.
      * 
-     *  @param totalSize the total size of the slab pool.
+     *  @param initialSize the total size of the slab pool.
      */
-    SlabAllocator(const size_t totalSize, kmalloc_eternal_tag);
+    SlabAllocator(const size_t initialSize, kernel_init_tag);
     
     /*
      *  @brief Initialize the slab allocator
      *  Only used by KernelHeap to initially construct the Slab Allocator.
      * 
-     *  @param totalSize the total size of the slab pool.
+     *  @param initialSize the total size of the slab pool.
      */
-    void Initialize(const size_t totalSize, kmalloc_eternal_tag);
+    void Initialize(const size_t initialSize, kernel_init_tag);
 
     struct SlabEntry
     {
@@ -177,7 +175,6 @@ private:
     SlabCache               m_mainSlabCache;        ///< The main slab cache.
     SlabCacheList           m_slabCacheList;        ///< The slab cache list for additional slab caches.
     size_t                  m_totalSlabsAvailable;  ///< The total number of slabs available.
-    size_t                  m_totalSize;            ///< The total size of the slab cache.
 
     static_assert(sizeof(SlabEntry) <= SLAB_SIZE, "Slab size must be bigger than SLAB_SIZE");
     static_assert(IsPowerOfTwo<SLAB_SIZE>::value);

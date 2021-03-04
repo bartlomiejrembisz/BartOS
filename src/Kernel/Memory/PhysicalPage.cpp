@@ -33,10 +33,8 @@ PhysicalPage &PhysicalPage::operator=(PhysicalPage &&rhs)
 
 // ---------------------------------------------------------------------------------------------------------
 
-void PhysicalPage::OnDie(Parent &object)
+void PhysicalPage::OnDie(PhysicalPage &physicalPage)
 {
-    PhysicalPage &physicalPage = static_cast<PhysicalPage &>(object);
-
     Pmm::Get().ReturnPage(&physicalPage);
 }
 

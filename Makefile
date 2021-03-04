@@ -1,6 +1,8 @@
 DIRECTIVES			:= 
 ARCH				:= x86_64
-CC					:= /home/bartek/opt/cross/bin/$(ARCH)-elf-gcc
+TOOL_CHAIN			:= /home/bartek/opt/cross/bin/
+#/home/bartek/libsupcxx/opt/cross/bin/
+CC					:= $(TOOL_CHAIN)$(ARCH)-elf-gcc
 GCC_FLAGS			:= -m64 -ffreestanding $(DIRECTIVES) -lgcc -g -Wall -Wextra -mno-red-zone -mno-80387 -mno-sse -mno-sse2 -mno-mmx -mcmodel=kernel -fno-PIC -mno-red-zone
 ASSEMBLER_FLAGS		:= -felf64 -F dwarf -g
 C_FLAGS				:= -std=c99 $(GCC_FLAGS)
@@ -13,7 +15,7 @@ KERNEL_SRC 			:= $(SRC)/Kernel
 CORE_SRC			:= $(SRC)/Core
 RUNTIME_SRC			:= $(SRC)/Runtime
 OBJ_DIR				:= $(BIN)/obj
-INCLUDE_DIRS		:= ./include ./src ./include/cxxshim ./src/Libraries/libcpp/
+INCLUDE_DIRS		:= ./include ./src ./src/Libraries/libcpp/ ./include/cxxshim ./include/c++
 INCLUDE				:= $(addprefix -I, $(INCLUDE_DIRS))
 LIB					:= ./lib
 
@@ -50,7 +52,7 @@ iso: build
 	@grub-mkrescue -o $(KERNEL_ISO) isofiles/
 
 build: $(OBJECTS) $(OBJECTS_RUNTIME)
-	/home/bartek/opt/cross/bin/$(ARCH)-elf-ld $(LINKER_FLAGS) -T $(LINKER_SCRIPT) -o $(KERNEL_DIR) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECTS) $(ICXXABI_OBJ) $(CRTEND_OBJ) $(CRTN_OBJ)
+	$(TOOL_CHAIN)$(ARCH)-elf-ld $(LINKER_FLAGS) -T $(LINKER_SCRIPT) -o $(KERNEL_DIR) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJECTS) $(ICXXABI_OBJ) $(CRTEND_OBJ) $(CRTN_OBJ)
 	mkdir -p $(OBJ_DIR)
 	mv $(OBJECTS) $(OBJECTS_RUNTIME) $(OBJ_DIR)
 
@@ -64,10 +66,14 @@ build: $(OBJECTS) $(OBJECTS_RUNTIME)
 	nasm $(ASSEMBLER_FLAGS) $< -o $@
 
 run: iso
-	qemu-system-x86_64 $(QEMU_FLAGS) -monitor stdio
+	qemu-system-x86_64 $(QEMU_FLAGS) -monitor stdio -enable-kvm -cpu host 
 
 puredebug: iso
 	qemu-system-x86_64 $(QEMU_FLAGS) -debugcon stdio -s -S &
+
+kvmdebug: iso
+	qemu-system-x86_64 $(QEMU_FLAGS) -debugcon stdio -s -S -enable-kvm -cpu host  &
+	gdb -ex "target remote localhost:1234" -ex "symbol-file $(KERNEL_DIR)"
 
 debug: iso
 	qemu-system-x86_64 $(QEMU_FLAGS) -debugcon stdio -s -S &

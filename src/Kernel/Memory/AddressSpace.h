@@ -1,47 +1,26 @@
-#ifndef ADDRESS_SPACE_H
-#define ADDRESS_SPACE_H
+#ifndef KERNEL_ADDRESS_SPACE_H
+#define KERNEL_ADDRESS_SPACE_H
 
-#include "Kernel/BartOS.h"
-#include "Libraries/Misc/RefPtr.h"
+#include "Paging/Pml.h"
 
-#include "Kernel/Memory/Paging/PageTable.h"
+#include "VmArea.h"
 
-#include "VMArea.h"
+#include "frg/vector.hpp"
 
 namespace BartOS
 {
 
 namespace MM
-{ 
-    
-// Forward declare the Vmm
-class Vmm;
+{
 
 /*
- *  @brief The address space abstract class.
+ *  @brief The address space class.
  */
 class AddressSpace
 {
 public:
-    /*
-     *  @brief Constructor.
-     * 
-     *  Can only be used after the memory manager has been initialized.
-     *  Will allocate a page alligned kernel page for the PageTable.
-     */
-    AddressSpace();
-
-    /*
-     *  @brief Constructor.
-     * 
-     *  Can be used before the memory manager has been initialized.
-     * 
-     *  @param  pPageTable the pointer to the page table
-     */
-    AddressSpace(MM::PageTable * const pPageTable);
-
     //! Destructor.
-    virtual ~AddressSpace();
+    ~AddressSpace();
 
     /*
      *  @brief Allocate memory for this address space.
@@ -50,33 +29,63 @@ public:
      *  @param  pageSize the page size.
      *  @param  pageFlags the page flags
      */
-    virtual void *Allocate(size_t nBytes, const PageSize pageSize, const PageFlags pageFlags = NO_FLAGS) = 0;
+    void *Allocate(size_t nBytes, const PageSize pageSize, const PageFlags pageFlags = NO_FLAGS);
 
     /*
-     *  @brief Get the address space break.
+     *  @brief Allocate memory for this address space.
      * 
-     *  @return address space break.
+     *  @param  pVmArea pointer to the Vm Area.
      */
-    Address_t GetAddressSpaceBreak();
+    void AddVmArea(VmArea *pVmArea);
 
-protected:
+    /*
+     *  @brief Create the kernel address space.
+     * 
+     *  @param pPageTable the page table.
+     * 
+     *  @return the kernel address space.
+     */
+    static AddressSpace *CreateKernelAddressSpace(x86_64::PageTable * const pPageTable);
 
-    MM::PageTable   *m_pPageTable;       ///< Pointer to the P4 Page Table object.
-    Address_t       m_addressBreak;     ///< Where does the address break.
+private:
+    using VmAreaList = Vector<VmArea *>;
 
-    friend class VMArea;
+    /*
+     *  @brief Constructor
+     *
+     *  Used to initialize the kernel address space.
+     *
+     *  @param  pPageTable the pointer to the page table.
+     */
+    AddressSpace(x86_64::PageTable * const pPageTable, kernel_init_tag);
+
+    /*
+     *  @brief Synchronize the page tables.
+     */
+    void SynchronizePml();
+
+    MM::Pml4                    m_pml4;                 ///< Pointer to the Pml object.
+
+    VmArea                      m_textVmArea;           ///< The text vm area.
+    VmArea                      m_roDataVmArea;         ///< The ro data vm area.
+    VmArea                      m_dataVmArea;           ///< The data vm area.
+    VmArea                      m_bssVmArea;            ///< The bss vm area.
+    VmArea                      m_heapVmArea;           ///< The heap vm area.
+    VmArea                      m_stackVmArea;          ///< The stack vm area.
+
+    VmAreaList                  m_vmAreaList;           ///< The VmArea lookup table.
+
     friend class MM::Vmm;
 };
 
 // ---------------------------------------------------------------------------------------------------------
 
-inline Address_t AddressSpace::GetAddressSpaceBreak()
+inline AddressSpace::~AddressSpace()
 {
-    return m_addressBreak;
 }
 
 } // namespace MM
 
 } // namespace BartOS
 
-#endif // ADDRESS_SPACE_H
+#endif // KERNEL_ADDRESS_SPACE_H

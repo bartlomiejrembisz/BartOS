@@ -56,7 +56,7 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     if (MULTIBOOT2_BOOTLOADER_MAGIC != magic)
     {
         kprintf("Multiboot2 header doesn't match the magic number. %x != %x", MULTIBOOT2_BOOTLOADER_MAGIC, magic);
-        x86_64::CPU::Hlt();
+        x86_64::Hlt();
     }
     
     kprintf("BartOS by Bartlomiej Rembisz\n");
@@ -68,7 +68,7 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     g_pBootInfo = pBootInfo;
 
     x86_64::GDT::Get().Initialize();
-    x86_64::IDT::IDT::Get().Initialize();
+    x86_64::IDT::Get().Initialize();
 
     // Init kmalloc eternal.
     init_kmalloc_eternal();
@@ -77,12 +77,12 @@ extern "C" [[noreturn]] void kernel_main(uint32_t magic, const boot_info *pBootI
     if (STATUS_CODE_SUCCESS != statusCode)
     {
         kprintf("[PMM] Failed to initialize the physical memory manager, status code=%u - %s", statusCode, "");
-        x86_64::CPU::Hlt();
+        x86_64::Hlt();
     }
 
     MM::Vmm::Get().Initialize();
 
-    x86_64::CPU::Sti();
+    x86_64::Sti();
 
     while (true);
 }
