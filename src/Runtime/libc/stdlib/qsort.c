@@ -136,11 +136,6 @@ static void _qsort(void* a, size_t n, size_t es,
 loop:
 	if(depth_limit-- <= 0)
 	{
-#ifdef I_AM_QSORT_R
-		heapsort_r(a, n, es, thunk, cmp);
-#else
-		heapsort(a, n, es, cmp);
-#endif
 		return;
 	}
 	SWAPINIT(a, es);

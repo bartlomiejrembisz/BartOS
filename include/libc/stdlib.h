@@ -515,66 +515,6 @@ int rand(void);
 void srand(unsigned seed);
 
 /**
- * @brief Sorts the given array pointed to by vbase in ascending order.
- *
- * The heapsort() function is a modified selection sort. It sorts an array of nmemb objects,
- * the initial member of which is pointed to by vbase. The size of each object is specified by size.
- *
- * The contents of the array base are sorted in ascending order according to a comparison
- * function pointed to by compar, which requires two arguments pointing to the objects being
- * compared.
- *
- * @param vbase a pointer to the array to sort
- * @param nmemb the number of objects to sort
- * @param size the size of each object in the array
- * @param compar comparison function which returns ​a negative integer
- *  value if the first argument is less than the second,a positive integer value
- *  if the first argument is greater than the second and zero if the arguments are equal.
- *  key is passed as the first argument, an element from the array as the second.
- *  The signature of the comparison function should be equivalent to the following:
- *       int cmp(const void *a, const void *b);
- *
- * @return the value 0 if successful; otherwise the value -1 is returned and
- * the global variable errno is set to indicate the error.
- *
- * */
-int heapsort(void* vbase, size_t nmemb, size_t size, int (*compar)(const void*, const void*));
-
-/**
- * @brief Sorts the given array pointed to by vbase in ascending order.
- *
- * It sorts an array of nmemb objects,
- * the initial member of which is pointed to by vbase. The size of each object is specified by size.
- * The heapsort_r() function behaves identically to @see heapsort(), except that it
- * takes an additional argument, thunk, which	is passed unchanged as the
- * first argument to function	pointed	to compar.  This allows	the comparison
- * function to access	additional data	without	using global variables,	and
- * thus heapsort_r() is suitable for use in functions which must be reentrant.
- * And is therefore reentrant and safe to use in threads.
- *
- * The contents of the array base are sorted in ascending order according to a comparison
- * function pointed to by compar, which requires two arguments pointing to the objects being
- * compared.
- *
- * @param vbase a pointer to the array to sort
- * @param nmemb the number of objects to sort
- * @param size the size of each object in the array
- * @param thunk additional data(variable) for compar
- * @param compar comparison function which returns ​a negative integer
- *  value if the first argument is less than the second,a positive integer value
- *  if the first argument is greater than the second and zero if the arguments are equal.
- *  key is passed as the first argument, an element from the array as the second.
- *  The signature of the comparison function should be equivalent to the following:
- *       int cmp(const void *a, const void *b);
- *
- * @return the value 0 if successful; otherwise the value -1 is returned and
- * the global variable errno is set to indicate the error.
- *
- * */
-int heapsort_r(void* vbase, size_t nmemb, size_t size, void* thunk,
-			   int (*compar)(void*, const void*, const void*));
-
-/**
  * @brief Finds an element equal to element pointed to by key in an array pointed to by ptr.
  *
  *
