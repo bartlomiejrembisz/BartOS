@@ -1,0 +1,69 @@
+diff --color -ur source/config/gthr.m4 dest/config/gthr.m4
+--- source/config/gthr.m4	2020-07-23 07:35:16.000000000 +0100
++++ dest/config/gthr.m4	2021-03-12 20:12:46.042642550 +0000
+@@ -22,6 +22,7 @@
+     tpf)	thread_header=config/s390/gthr-tpf.h ;;
+     vxworks)	thread_header=config/gthr-vxworks.h ;;
+     win32)	thread_header=config/i386/gthr-win32.h ;;
++    bthread)	thread_header=gthr-bthread.h ;;
+ esac
+ AC_SUBST(thread_header)
+ ])
+diff --color -ur source/gcc/config.gcc dest/gcc/config.gcc
+--- source/gcc/config.gcc	2020-07-23 07:35:17.000000000 +0100
++++ dest/gcc/config.gcc	2021-03-12 20:36:13.248787593 +0000
+@@ -5349,3 +5349,8 @@
+ 	fi
+ 	;;
+ esac
++
++case ${enable_threads} in
++    xbthread) thread_file='xbthread' ;;
++    bthread) thread_file='bthread' ;;
++esac
+diff --color -ur source/gcc/configure dest/gcc/configure
+--- source/gcc/configure	2020-07-23 07:35:17.000000000 +0100
++++ dest/gcc/configure	2021-03-12 20:39:30.740488649 +0000
+@@ -12209,7 +12209,7 @@
+     target_thread_file='single'
+     ;;
+   aix | dce | lynx | mipssde | posix | rtems | \
+-  single | tpf | vxworks | win32)
++  single | tpf | vxworks | win32 | bthread)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+diff --color -ur source/gcc/configure.ac dest/gcc/configure.ac
+--- source/gcc/configure.ac	2020-07-23 07:35:17.000000000 +0100
++++ dest/gcc/configure.ac	2021-03-12 20:40:27.276402614 +0000
+@@ -1801,7 +1801,7 @@
+     target_thread_file='single'
+     ;;
+   aix | dce | lynx | mipssde | posix | rtems | \
+-  single | tpf | vxworks | win32)
++  single | tpf | vxworks | win32 | bthread)
+     target_thread_file=${enable_threads}
+     ;;
+   *)
+diff --color -ur source/libgcc/configure dest/libgcc/configure
+--- source/libgcc/configure	2020-07-23 07:35:18.000000000 +0100
++++ dest/libgcc/configure	2021-03-12 20:50:52.687442929 +0000
+@@ -5649,6 +5649,7 @@
+     tpf)	thread_header=config/s390/gthr-tpf.h ;;
+     vxworks)	thread_header=config/gthr-vxworks.h ;;
+     win32)	thread_header=config/i386/gthr-win32.h ;;
++    bthread)	thread_header=gthr-bthread.h ;;
+ esac
+ 
+ 
+diff --color -ur source/libstdc++-v3/configure dest/libstdc++-v3/configure
+--- source/libstdc++-v3/configure	2020-07-23 07:35:19.000000000 +0100
++++ dest/libstdc++-v3/configure	2021-03-12 20:51:52.023351407 +0000
+@@ -15646,6 +15646,7 @@
+     tpf)	thread_header=config/s390/gthr-tpf.h ;;
+     vxworks)	thread_header=config/gthr-vxworks.h ;;
+     win32)	thread_header=config/i386/gthr-win32.h ;;
++    bthread)	thread_header=gthr-bthread.h ;;
+ esac
+ 
+ 
